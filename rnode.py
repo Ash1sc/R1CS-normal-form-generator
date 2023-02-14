@@ -22,6 +22,14 @@ class RNode:  # 对于类的定义我们要求首字母大写
         return node
 
     @classmethod
+    def new_const_node(cls, con=0):
+        node = RNode(RNode.current_id, Op.NULL, "~one", con)
+        RNode.node_list.append(node)
+        RNode.current_id += 1
+
+        return node
+
+    @classmethod
     def clear(cls):
         RNode.current_id = 0
         RNode.node_list = []
@@ -41,7 +49,10 @@ class RNode:  # 对于类的定义我们要求首字母大写
             self.father.append(f)
 
     def to_string(self):
-        return "Node id: %d, name: %s, op: %s" % (self.id, self.name, self.op.name)
+        if self.name == RNode.CONST_NAME:
+            return "Node id: %d, name: %s, value: %d" % (self.id, self.name, self.const)
+        else:
+            return "Node id: %d, name: %s, op: %s" % (self.id, self.name, self.op.name)
 
     def print(self):
         print(self.to_string())
@@ -56,24 +67,36 @@ class RNode:  # 对于类的定义我们要求首字母大写
                 print("\t\t%s" % (c.to_string(),))
 
     def add_child(self, c):
+        for node in self.child:
+            if c.id==node.id:
+                return False
+
         self.child.append(c)
         c.father.append(self)
+        return True
 
     def add_father(self, f):
+        for node in self.father:
+            if f.id==node.id:
+                return False
+
         self.father.append(f)
         f.child.append(self)
+        return True
 
     def remove_child(self, c):
         for node in self.child:
             if node.id == c.id:
                 self.child.remove(node)
-                break
+                return True
+        return False
 
     def remove_father(self, f):
         for node in self.father:
             if node.id == f.id:
                 self.father.remove(node)
-                break
+                return True
+        return False
 
     def have_mul(self, node):
         """
@@ -109,12 +132,13 @@ class RNode:  # 对于类的定义我们要求首字母大写
         :param node:
         :return: 相加后中间变量的node
         """
-        result = RNode.new_node(Op.ADD)
-        self.child.append(result)
-        node.child.append(result)
-        result.father.append(self)
-        result.father.append(node)
-
+        result = self.have_add(node)
+        if result is None:
+            result = RNode.new_node(Op.ADD)
+            self.child.append(result)
+            node.child.append(result)
+            result.father.append(self)
+            result.father.append(node)
         return result
 
     def mul(self, node):
@@ -123,10 +147,12 @@ class RNode:  # 对于类的定义我们要求首字母大写
         :param node:
         :return: 相乘后中间变量的node
         """
-        result = RNode.new_node(Op.MUL)
-        self.child.append(result)
-        node.child.append(result)
-        result.father.append(self)
-        result.father.append(node)
+        result = self.have_mul(node)
+        if result is None:
+            result = RNode.new_node(Op.MUL)
+            self.child.append(result)
+            node.child.append(result)
+            result.father.append(self)
+            result.father.append(node)
 
         return result
