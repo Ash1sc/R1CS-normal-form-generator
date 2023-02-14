@@ -14,8 +14,8 @@ class RNode:  # 对于类的定义我们要求首字母大写
     current_id = 0
 
     @classmethod
-    def new_node(cls, op=Op.NULL, name="_"):
-        node = RNode(RNode.current_id, op, name)
+    def new_node(cls, op=Op.NULL, name="_", con=0):
+        node = RNode(RNode.current_id, op, name, con)
         RNode.node_list.append(node)
         RNode.current_id += 1
 
@@ -27,7 +27,7 @@ class RNode:  # 对于类的定义我们要求首字母大写
         RNode.node_list = []
         print("Clear the node list")
 
-    def __init__(self, id, op=Op.NULL, name="_", child=[], father=[], con=0):  # 初始化类的属性
+    def __init__(self, id, op=Op.NULL, name="_", con=0, child=[], father=[]):  # 初始化类的属性
         self.id = id
         self.op = op
         self.const = con
