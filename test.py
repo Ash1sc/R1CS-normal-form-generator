@@ -11,6 +11,9 @@ def all_test():
     print("---Rnode creation test---")
     rnode_creation_test()
 
+    print("---Tree creation test----")
+    tree_creation_test()
+
     print("---------Test end--------")
 
 
@@ -40,4 +43,7 @@ def rnode_creation_test():
 
 
 def tree_creation_test():
+    a,b,c=util.make_matrix()
+
+    node_num=len(a[0])
     return "yes"

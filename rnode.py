@@ -9,6 +9,7 @@ class Op(Enum):
 
 class RNode:  # 对于类的定义我们要求首字母大写
 
+    CONST_NAME = "~one"
     node_list = []
     current_id = 0
 
@@ -26,9 +27,10 @@ class RNode:  # 对于类的定义我们要求首字母大写
         RNode.node_list = []
         print("Clear the node list")
 
-    def __init__(self, id, op=Op.NULL, name="_", child=[], father=[]):  # 初始化类的属性
+    def __init__(self, id, op=Op.NULL, name="_", child=[], father=[], con=0):  # 初始化类的属性
         self.id = id
         self.op = op
+        self.const = con
         self.name = name
         self.child = []
         for c in child:
@@ -107,7 +109,7 @@ class RNode:  # 对于类的定义我们要求首字母大写
         :param node:
         :return: 相加后中间变量的node
         """
-        result=RNode.new_node(Op.ADD)
+        result = RNode.new_node(Op.ADD)
         self.child.append(result)
         node.child.append(result)
         result.father.append(self)
