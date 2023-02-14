@@ -75,16 +75,22 @@ def tree_creation_test():
                     if constraint_a[i] != 0:
                         if i == 0:
                             node1 = RNode.new_const_node(constraint_a[0])
+                        elif constraint_a[i]==1:
+                            node1=RNode.node_list[i-1]
                         else:
                             node1 = RNode.node_list[i - 1].mul(RNode.new_const_node(constraint_a[i]))
                     if constraint_b[i] != 0:
                         if i == 0:
                             node2 = RNode.new_const_node(constraint_b[0])
+                        elif constraint_b[i] == 1:
+                            node2 = RNode.node_list[i - 1]
                         else:
                             node2 = RNode.node_list[i - 1].mul(RNode.new_const_node(constraint_b[i]))
                     if constraint_c[i] != 0:
-                        if i==0:
-                            node3=RNode.new_const_node(constraint_c[0])
+                        if i == 0:
+                            node3 = RNode.new_const_node(constraint_c[0])
+                        elif constraint_c[i] == 1:
+                            node3 = RNode.node_list[i - 1]
                         else:
                             node3 = RNode.node_list[i - 1]
 
@@ -92,8 +98,9 @@ def tree_creation_test():
                 node2.add_child(node3)
                 node3.add_father(node1)
                 node3.add_father(node2)
-                node3.op=Op.MUL
+                node3.op = Op.MUL
 
-
+                for node in RNode.node_list:
+                    node.print()
 
     return "yes"
