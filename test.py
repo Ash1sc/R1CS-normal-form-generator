@@ -1,6 +1,5 @@
-import rnode
 import util
-from rnode import RNode
+from rnode import *
 
 
 def all_test():
@@ -24,15 +23,21 @@ def matrix_test():
 
 
 def rnode_creation_test():
-    node1 = RNode(0, rnode.Op.MUL, "x", [], [])
-    node2 = RNode(1, rnode.Op.MUL, "x_2", [], [])
-    node3 = RNode(2, rnode.Op.MUL, "x_3", [], [])
-    node1.print()
-    node2.print()
-    node3.print()
+    node1 = RNode.new_node(Op.MUL, "x")
+    node2 = RNode.new_node(Op.MUL, "x_2")
+    node3 = RNode.new_node(Op.MUL, "x_3")
+    for node in RNode.node_list:
+        node.print()
 
     node2.add_child(node3)
     node2.add_father(node1)
-    node1.print()
-    node2.print()
-    node3.print()
+    for node in RNode.node_list:
+        node.print()
+
+    RNode.clear()
+    for node in RNode.node_list:
+        node.print()
+
+
+def tree_creation_test():
+    return "yes"
