@@ -430,4 +430,4 @@ def tree_creation_test():
         for node in RNode.node_list:
             node.print()
 
-    return "yes"
+    return RNode.node_list
