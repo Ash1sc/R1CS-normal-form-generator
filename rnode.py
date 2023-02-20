@@ -156,3 +156,6 @@ class RNode:  # 对于类的定义我们要求首字母大写
             result.father.append(node)
 
         return result
+
+    def is_const(self):
+        return self.name==RNode.CONST_NAME

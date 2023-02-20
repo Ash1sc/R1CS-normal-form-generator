@@ -75,34 +75,45 @@ def tree_creation_test():
                 node1 = None
                 node2 = None
                 node3 = None
+
+                # 依次遍历矩阵中的node, 找出三个矩阵向量中field的非零部分
                 for i in range(var_num):
                     if constraint_a[i] != 0:
 
                         # 如果是~one变量, 那么创建const node
                         if i == 0:
                             node1 = RNode.new_const_node(constraint_a[0])
+                            print("\tCASE1, add a const node as node1, value: %d" % (constraint_a[0],))
 
                         # 如果field为1, 直接取node_list中的node
                         elif constraint_a[i] == 1:
                             node1 = RNode.node_list[i - 1]
+                            print("\tCASE1, choose an existing node as node1, id: %d" % (i - 1,))
 
                         # field不为1 ,创建const node与node_list中的node相乘,并返回相乘的node
                         else:
                             node1 = RNode.node_list[i - 1].mul(RNode.new_const_node(constraint_a[i]))
+                            print("\tCASE1, mul const node with an existing node as node1, id: %d" % (node1.id,))
+
                     if constraint_b[i] != 0:
                         if i == 0:
                             node2 = RNode.new_const_node(constraint_b[0])
+                            print("\tCASE1, add a const node as node2, value: %d" % (constraint_b[0],))
                         elif constraint_b[i] == 1:
                             node2 = RNode.node_list[i - 1]
+                            print("\tCASE1, choose an existing node as node2, id: %d" % (i - 1,))
                         else:
                             node2 = RNode.node_list[i - 1].mul(RNode.new_const_node(constraint_b[i]))
+                            print("\tCASE1, mul const node with an existing node as node2, id: %d" % (node2.id,))
                     if constraint_c[i] != 0:
                         if i == 0:
                             node3 = RNode.new_const_node(constraint_c[0])
+                            print("\tCASE1, add a const node as node3, value: %d" % (constraint_c[0],))
 
                         # c中的非零field一定为1,所以一定可以直接取node list中的node
                         else:
                             node3 = RNode.node_list[i - 1]
+                            print("\tCASE1, choose an existing node as node3, id: %d" % (i - 1,))
 
                 node1.add_child(node3)
                 node2.add_child(node3)
@@ -131,54 +142,65 @@ def tree_creation_test():
                         last_b = var_num - 1 - i
                         break
 
-                print("last_a: %d, last_b: %d" % (last_a, last_b))
+                print("\tCASE2, last_a: %d, last_b: %d" % (last_a, last_b))
 
                 for i_a in range(var_num):
 
                     # 创建node1
                     if constraint_a[i_a] != 0:
-                        print("build node1 at index: ", i_a)
+
                         # 如果是~one变量, 那么创建const node
                         if i_a == 0:
                             node1 = RNode.new_const_node(constraint_a[0])
+                            print("\tCASE2, add a const node as node1, value: %d, id: %d" % (constraint_a[0], node1.id))
 
                         # 如果field为1, 直接取node_list中的node
                         elif constraint_a[i_a] == 1:
                             node1 = RNode.node_list[i_a - 1]
+                            print("\tCASE2, choose an existing node as node1, id: %d" % (node1.id,))
 
                         # field不为1 ,创建const node与node_list中的node相乘,并返回相乘的node
                         else:
                             node1 = RNode.node_list[i_a - 1].mul(RNode.new_const_node(constraint_a[i_a]))
+                            print("\tCASE2, mul const node with an existing node as node1, id: %d" % (node1.id,))
 
                         for i_b in range(var_num):
                             # 创建node2
                             if constraint_b[i_b] != 0:
-                                print("\tbuild node2 at index: ", i_b)
+
                                 # 如果是~one变量, 那么创建const node
                                 if i_b == 0:
                                     node2 = RNode.new_const_node(constraint_b[0])
+                                    print("\t\tCASE2, add a const node as node2, value: %d, id: %d" % (
+                                        constraint_b[0], node2.id))
 
                                 # 如果field为1, 直接取node_list中的node
                                 elif constraint_b[i_b] == 1:
                                     node2 = RNode.node_list[i_b - 1]
+                                    print("\t\tCASE2, choose an existing node as node2, id: %d" % (node2.id,))
 
                                 # field不为1 ,创建const node与node_list中的node相乘,并返回相乘的node
                                 else:
                                     node2 = RNode.node_list[i_b - 1].mul(RNode.new_const_node(constraint_b[i_b]))
+                                    print(
+                                        "\t\tCASE2, mul const node with an existing node as node2, id: %d" % (
+                                            node2.id,))
 
                                 # 分配律到达最后一项
-                                print("\ti_a: %d, i_b: %d, last_a: %d, last_b: %d" % (i_a, i_b, last_a, last_b))
                                 if i_a == last_a and i_b == last_b:
-
+                                    print("\t\tCASE2, last step at last_a: %d, last_b: %d" % (last_a, last_b))
                                     # 创建node3
                                     for i in range(var_num):
                                         if constraint_c[i] != 0:
                                             if i == 0:
-                                                print("\tbuild const node3 at index: ", i)
                                                 node_right = RNode.new_const_node(constraint_c[0])
+                                                print("\t\tCASE2, add a const node as node_right, value: %d, id: %d" % (
+                                                    constraint_c[0], node_right.id))
                                             else:
-                                                print("\tchoose node3 at index: ", i)
                                                 node_right = RNode.node_list[i - 1]
+                                                print(
+                                                    "\t\tCASE2, choose an existing node as node_right, id: %d" % (
+                                                        node_right.id,))
 
                                     node3 = node1.mul(node2)
 
@@ -192,8 +214,12 @@ def tree_creation_test():
                                 else:
                                     if node_left is None:
                                         node_left = node1.mul(node2)
+                                        print("\t\tCASE2, node_left is None, id: %d, node1 id: %d. node2 id: %d" % (
+                                            node_left.id, node1.id, node2.id))
                                     else:
                                         node_left = node_left.add(node1.mul(node2))
+                                        print("\t\tCASE2, add to node_left, id: %d, node1 id: %d. node2 id: %d" % (
+                                            node_left.id, node1.id, node2.id))
         else:
             # CASE 3: ab单一,c不单一
             # 该约束c中有多于一个field不为0, 但是a与b中只有一个field为非0
@@ -256,7 +282,7 @@ def tree_creation_test():
 
                 node3 = RNode.node_list[node3_index - 1]
 
-                node3.op=Op.ADD
+                node3.op = Op.ADD
                 node3.add_father(node_right)
                 node3.add_father(node_left)
                 node_left.add_child(node3)
@@ -336,13 +362,13 @@ def tree_creation_test():
 
                 node3 = RNode.node_list[node3_index - 1]
 
-                node3.op=Op.ADD
+                node3.op = Op.ADD
                 node3.add_father(node_right)
                 node3.add_father(node_left)
                 node_left.add_child(node3)
                 node_right.add_child(node3)
 
-    for node in RNode.node_list:
-        node.print()
+        for node in RNode.node_list:
+            node.print()
 
     return "yes"
