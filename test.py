@@ -126,6 +126,8 @@ def tree_creation_test():
             else:
                 node1 = None
                 node2 = None
+                node1_flag = False
+                node2_flag = False
                 node_left = None
                 node_right = None
                 last_a = -1
@@ -146,11 +148,15 @@ def tree_creation_test():
 
                 for i_a in range(var_num):
 
+                    node1_flag = False
+                    node1 = None
                     # 创建node1
                     if constraint_a[i_a] != 0:
 
                         # 如果是~one变量, 那么创建const node
-                        if i_a == 0:
+                        if i_a == 0 and constraint_a[0] == 1:
+                            node1_flag = True
+                        elif i_a == 0 and constraint_a[0] != 1:
                             node1 = RNode.new_const_node(constraint_a[0])
                             print("\tCASE2, add a const node as node1, value: %d, id: %d" % (constraint_a[0], node1.id))
 
@@ -165,11 +171,18 @@ def tree_creation_test():
                             print("\tCASE2, mul const node with an existing node as node1, id: %d" % (node1.id,))
 
                         for i_b in range(var_num):
+
                             # 创建node2
+                            node2_flag = False
+                            node2 = None
+
                             if constraint_b[i_b] != 0:
 
                                 # 如果是~one变量, 那么创建const node
-                                if i_b == 0:
+                                if i_b == 0 and constraint_b[0] == 1:
+                                    node2_flag = True
+
+                                elif i_b == 0 and constraint_b[0] != 1:
                                     node2 = RNode.new_const_node(constraint_b[0])
                                     print("\t\tCASE2, add a const node as node2, value: %d, id: %d" % (
                                         constraint_b[0], node2.id))
@@ -188,7 +201,9 @@ def tree_creation_test():
 
                                 # 分配律到达最后一项
                                 if i_a == last_a and i_b == last_b:
-                                    print("\t\tCASE2, last step at last_a: %d, last_b: %d" % (last_a, last_b))
+                                    print(
+                                        "\t\tCASE2, last step at last_a: %d, last_b: %d, node3 + node_left = node_right" % (
+                                            last_a, last_b))
                                     # 创建node3
                                     for i in range(var_num):
                                         if constraint_c[i] != 0:
@@ -202,7 +217,25 @@ def tree_creation_test():
                                                     "\t\tCASE2, choose an existing node as node_right, id: %d" % (
                                                         node_right.id,))
 
-                                    node3 = node1.mul(node2)
+                                    if node1 is None or (node1.is_const() and node1.const == 1):
+                                        if node2_flag:
+                                            node2 = RNode.new_const_node(1)
+                                        node3 = node2
+                                        print(
+                                            "\t\tCASE2, choose node2 as node3, node3 id: %d " % (
+                                                node3.id,))
+                                    elif node2 is None or (node2.is_const() and node2.const == 1):
+                                        if node1_flag:
+                                            node1 = RNode.new_const_node(1)
+                                        node3 = node1
+                                        print(
+                                            "\t\tCASE2, choose node1 as node3, node3 id: %d" % (
+                                                node3.id))
+
+                                    else:
+                                        node3 = node1.mul(node2)
+                                        print("\t\tCASE2, node3 id: %d, node1 id: %d. node2 id: %d" % (
+                                            node3.id, node1.id, node2.id))
 
                                     node_right.op = Op.ADD
 
@@ -213,13 +246,39 @@ def tree_creation_test():
                                     break
                                 else:
                                     if node_left is None:
-                                        node_left = node1.mul(node2)
-                                        print("\t\tCASE2, node_left is None, id: %d, node1 id: %d. node2 id: %d" % (
-                                            node_left.id, node1.id, node2.id))
+                                        if node1 is None or (node1.is_const() and node1.const == 1):
+                                            if node2_flag:
+                                                node2 = RNode.new_const_node(1)
+                                            node_left = node2
+                                            print(
+                                                "\t\tCASE2, node_left is None, choose node2 as node_left, node_left id: %d " % (
+                                                    node_left.id,))
+                                        elif node2 is None or (node2.is_const() and node2.const == 1):
+                                            if node1_flag:
+                                                node1 = RNode.new_const_node(1)
+                                            node_left = node1
+                                            print(
+                                                "\t\tCASE2, node_left is None, choose node1 as node_left, node_left id: %d" % (
+                                                    node_left.id))
+                                        else:
+                                            node_left = node1.mul(node2)
+                                            print("\t\tCASE2, node_left is None, id: %d, node1 id: %d. node2 id: %d" % (
+                                                node_left.id, node1.id, node2.id))
                                     else:
-                                        node_left = node_left.add(node1.mul(node2))
-                                        print("\t\tCASE2, add to node_left, id: %d, node1 id: %d. node2 id: %d" % (
-                                            node_left.id, node1.id, node2.id))
+                                        if node1.is_const() and node1.const == 1:
+                                            node_left = node_left.add(node2)
+                                            print(
+                                                "\t\tCASE2, add node2 to node_left, node2 id: %d, node_left id: %d" % (
+                                                    node2.id, node_left.id,))
+                                        elif node2.is_const() and node2.const == 1:
+                                            node_left = node_left.add(node1)
+                                            print(
+                                                "\t\tCASE2, add node1 to node_left, node1 id: %d, node_left id: %d" % (
+                                                    node1.id, node_left.id))
+                                        else:
+                                            node_left = node_left.add(node1.mul(node2))
+                                            print("\t\tCASE2, add to node_left, id: %d, node1 id: %d. node2 id: %d" % (
+                                                node_left.id, node1.id, node2.id))
         else:
             # CASE 3: ab单一,c不单一
             # 该约束c中有多于一个field不为0, 但是a与b中只有一个field为非0
