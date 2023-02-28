@@ -50,7 +50,7 @@ class RNode:  # 对于类的定义我们要求首字母大写
 
     def to_string(self):
         if self.name == RNode.CONST_NAME:
-            return "Node id: %d, name: %s, value: %d" % (self.id, self.name, self.const)
+            return "Node id: %d, name: %s, value: %.2f" % (self.id, self.name, self.const)
         else:
             return "Node id: %d, name: %s, op: %s" % (self.id, self.name, self.op.name)
 

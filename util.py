@@ -1,4 +1,4 @@
-TXT_PATH = "./constraints.txt"
+TXT_PATH = "./constraint2.txt"
 
 
 def make_matrix():

@@ -83,7 +83,7 @@ def tree_creation_test():
                         # 如果是~one变量, 那么创建const node
                         if i == 0:
                             node1 = RNode.new_const_node(constraint_a[0])
-                            print("\tCASE1, add a const node as node1, value: %d" % (constraint_a[0],))
+                            print("\tCASE1, add a const node as node1, value: %f" % (constraint_a[0],))
 
                         # 如果field为1, 直接取node_list中的node
                         elif constraint_a[i] == 1:
@@ -98,7 +98,7 @@ def tree_creation_test():
                     if constraint_b[i] != 0:
                         if i == 0:
                             node2 = RNode.new_const_node(constraint_b[0])
-                            print("\tCASE1, add a const node as node2, value: %d" % (constraint_b[0],))
+                            print("\tCASE1, add a const node as node2, value: %f" % (constraint_b[0],))
                         elif constraint_b[i] == 1:
                             node2 = RNode.node_list[i - 1]
                             print("\tCASE1, choose an existing node as node2, id: %d" % (i - 1,))
@@ -108,7 +108,7 @@ def tree_creation_test():
                     if constraint_c[i] != 0:
                         if i == 0:
                             node3 = RNode.new_const_node(constraint_c[0])
-                            print("\tCASE1, add a const node as node3, value: %d" % (constraint_c[0],))
+                            print("\tCASE1, add a const node as node3, value: %f" % (constraint_c[0],))
 
                         # c中的非零field一定为1,所以一定可以直接取node list中的node
                         else:
@@ -158,7 +158,7 @@ def tree_creation_test():
                             node1_flag = True
                         elif i_a == 0 and constraint_a[0] != 1:
                             node1 = RNode.new_const_node(constraint_a[0])
-                            print("\tCASE2, add a const node as node1, value: %d, id: %d" % (constraint_a[0], node1.id))
+                            print("\tCASE2, add a const node as node1, value: %f, id: %d" % (constraint_a[0], node1.id))
 
                         # 如果field为1, 直接取node_list中的node
                         elif constraint_a[i_a] == 1:
@@ -184,7 +184,7 @@ def tree_creation_test():
 
                                 elif i_b == 0 and constraint_b[0] != 1:
                                     node2 = RNode.new_const_node(constraint_b[0])
-                                    print("\t\tCASE2, add a const node as node2, value: %d, id: %d" % (
+                                    print("\t\tCASE2, add a const node as node2, value: %f, id: %d" % (
                                         constraint_b[0], node2.id))
 
                                 # 如果field为1, 直接取node_list中的node
@@ -209,7 +209,7 @@ def tree_creation_test():
                                         if constraint_c[i] != 0:
                                             if i == 0:
                                                 node_right = RNode.new_const_node(constraint_c[0])
-                                                print("\t\tCASE2, add a const node as node_right, value: %d, id: %d" % (
+                                                print("\t\tCASE2, add a const node as node_right, value: %f, id: %d" % (
                                                     constraint_c[0], node_right.id))
                                             else:
                                                 node_right = RNode.node_list[i - 1]
@@ -406,7 +406,7 @@ def tree_creation_test():
                         # 如果是~one变量, 那么创建const node
                         if i_a == 0 and constraint_a[0] != 1:
                             node1 = RNode.new_const_node(constraint_a[0])
-                            print("\tCASE4, add a const node as node1, value: %d, id: %d" % (constraint_a[0], node1.id))
+                            print("\tCASE4, add a const node as node1, value: %f, id: %d" % (constraint_a[0], node1.id))
 
 
                         elif i_a == 0 and constraint_a[0] == 1:
@@ -432,7 +432,7 @@ def tree_creation_test():
                                 # 如果是~one变量, 那么创建const node
                                 if i_b == 0 and constraint_b[0] != 1:
                                     node2 = RNode.new_const_node(constraint_b[0])
-                                    print("\t\tCASE4, add a const node as node2, value: %d, id: %d" % (
+                                    print("\t\tCASE4, add a const node as node2, value: %f, id: %d" % (
                                         constraint_b[0], node2.id))
                                 elif i_b == 0 and constraint_b[0] == 1:
                                     node2_flag = True
