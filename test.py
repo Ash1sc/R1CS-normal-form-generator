@@ -337,9 +337,10 @@ def tree_creation_test():
                     print(
                         "\tCASE3, node_left id: %d, node1 id: %d. node2 id: %d" % (node_left.id, node1.id, node2.id))
 
-                # 创建node_right=-field1-field2
+                # 创建node_right-field1-field2=node3
                 node_right = None
                 node3_index = -1
+                last_index = -1
                 node3 = None
                 node4 = None
 
@@ -347,11 +348,21 @@ def tree_creation_test():
                 for i in range(var_num):
                     if constraint_c[i] == 1:
                         node3_index = i
-                        print("\tCASE3, find node3, node3 id: %d" % (node3_index,))
+                        print("\tCASE3, find node3, node3 id: %d" % (node3_index - 1,))
+                        break
+
+                # 找到c中最后一个不为0的field的下标
+                for i in range(var_num):
+                    index = var_num - i - 1
+                    if index == node3_index:
+                        continue
+                    elif constraint_c[index] != 0:
+                        last_index = index
+                        print("\tCASE3, find last node in the add list, node id: %d" % (last_index - 1,))
                         break
 
                 for i in range(var_num):
-                    if constraint_c[i] != 0 and i != node3_index:
+                    if constraint_c[i] != 0 and i != node3_index and i != last_index:
 
                         # 构造node4
                         # 如果是~one变量, 那么创建const node
@@ -362,17 +373,32 @@ def tree_creation_test():
                         else:
                             node4 = RNode.node_list[i - 1].mul(RNode.new_const_node(0 - constraint_c[i]))
 
-                        if node_right is None:
-                            node_right = node4
-                            print("\tCASE3, node_right is None, choose node4, node 4 id: %d" % (node4.id,))
-                        else:
-                            old_node_right_id = node_right.id
-                            node_right = node_right.add(node4)
-                            print("\tCASE3, add node4 to node_right, new id: %d, old id: %d, node4 id: %d" % (
-                                node_right.id, old_node_right_id, node4.id))
+                        old_node_left_id = node_left.id
+                        node_left=node_left.add(node4)
+                        print("\tCASE3, add node4 to node_left, new id: %d, old id: %d, node4 id: %d" % (
+                            node_left.id, old_node_left_id, node4.id))
 
-                if node3_index==0:
-                    node3= RNode.new_const_node(1)
+                        # if node_right is None:
+                        #     node_right = node4
+                        #     print("\tCASE3, node_right is None, choose node4, node 4 id: %d" % (node4.id,))
+                        # else:
+                        #     old_node_right_id = node_right.id
+                        #     node_right = node_right.add(node4)
+                        #     print("\tCASE3, add node4 to node_right, new id: %d, old id: %d, node4 id: %d" % (
+                        #         node_right.id, old_node_right_id, node4.id))
+
+                    # 利用最后一个node构建node_right
+                    elif constraint_c[i] != 0 and i != node3_index and i == last_index:
+                        if i == 0:
+                            node_right = RNode.new_const_node(0 - constraint_c[0])
+                        elif constraint_c[i] == -1:
+                            node_right = RNode.node_list[i - 1]
+                        else:
+                            node_right = RNode.node_list[i - 1].mul(RNode.new_const_node(0 - constraint_c[i]))
+
+
+                if node3_index == 0:
+                    node3 = RNode.new_const_node(1)
                 else:
                     node3 = RNode.node_list[node3_index - 1]
 
@@ -486,19 +512,31 @@ def tree_creation_test():
                                         print("\t\tCASE4, add to node_left, id: %d, node1 id: %d. node2 id: %d" % (
                                             node_left.id, node1.id, node2.id))
 
-                # 创建node_right=-field1-field2
+                # 创建node_right-field1-field2=node3
                 node_right = None
                 node3_index = -1
+                last_index = -1
                 node3 = None
                 node4 = None
                 for i in range(var_num):
                     if constraint_c[i] == 1:
                         node3_index = i
-                        print("\tCASE4, find node3, node3 id: %d" % (node3_index,))
+                        print("\tCASE4, find node3, node3 id: %d" % (node3_index-1,))
+                        break
+
+                # 找到c中最后一个不为0的field的下标
+                for i in range(var_num):
+                    index = var_num - i - 1
+                    if index == node3_index:
+                        continue
+                    elif constraint_c[index] != 0:
+                        last_index = index
+                        print("\tCASE4, find last node in the add list, node id: %d" % (last_index - 1,))
                         break
 
                 for i in range(var_num):
-                    if constraint_c[i] != 0 and i != node3_index:
+
+                    if constraint_c[i] != 0 and i != node3_index and i != last_index:
 
                         # 构造node4
                         # 如果是~one变量, 那么创建const node
@@ -509,15 +547,29 @@ def tree_creation_test():
                         else:
                             node4 = RNode.node_list[i - 1].mul(RNode.new_const_node(0 - constraint_c[i]))
 
-                        if node_right is None:
-                            node_right = node4
-                            print("\tCASE4, node_right is None, choose node4, node 4 id: %d" % (node4.id,))
+                        old_node_left_id = node_left.id
+                        node_left = node_left.add(node4)
+                        print("\tCASE4, add node4 to node_left, new id: %d, old id: %d, node4 id: %d" % (
+                            node_left.id, old_node_left_id, node4.id))
 
+                        # if node_right is None:
+                        #     node_right = node4
+                        #     print("\tCASE4, node_right is None, choose node4, node 4 id: %d" % (node4.id,))
+                        #
+                        # else:
+                        #     old_node_right_id = node_right.id
+                        #     node_right = node_right.add(node4)
+                        #     print("\tCASE4, add node4 to node_right, new id: %d, old id: %d, node4 id: %d" % (
+                        #         node_right.id, old_node_right_id, node4.id))
+
+                    # 利用最后一个node构建node_right
+                    elif constraint_c[i] != 0 and i != node3_index and i == last_index:
+                        if i == 0:
+                            node_right = RNode.new_const_node(0 - constraint_c[0])
+                        elif constraint_c[i] == -1:
+                            node_right = RNode.node_list[i - 1]
                         else:
-                            old_node_right_id = node_right.id
-                            node_right = node_right.add(node4)
-                            print("\tCASE4, add node4 to node_right, new id: %d, old id: %d, node4 id: %d" % (
-                                node_right.id, old_node_right_id, node4.id))
+                            node_right = RNode.node_list[i - 1].mul(RNode.new_const_node(0 - constraint_c[i]))
 
                 if node3_index == 0:
                     node3 = RNode.new_const_node(1)
