@@ -1,5 +1,5 @@
 import util
-import numpy as np
+import pagerank as pr
 from rnode import *
 
 
@@ -14,6 +14,9 @@ def all_test():
 
     print("---Tree creation test----")
     tree_creation_test()
+
+    print("----Node weight test-----")
+    node_weight_test()
 
     print("---------Test end--------")
 
@@ -374,7 +377,7 @@ def tree_creation_test():
                             node4 = RNode.node_list[i - 1].mul(RNode.new_const_node(0 - constraint_c[i]))
 
                         old_node_left_id = node_left.id
-                        node_left=node_left.add(node4)
+                        node_left = node_left.add(node4)
                         print("\tCASE3, add node4 to node_left, new id: %d, old id: %d, node4 id: %d" % (
                             node_left.id, old_node_left_id, node4.id))
 
@@ -395,7 +398,6 @@ def tree_creation_test():
                             node_right = RNode.node_list[i - 1]
                         else:
                             node_right = RNode.node_list[i - 1].mul(RNode.new_const_node(0 - constraint_c[i]))
-
 
                 if node3_index == 0:
                     node3 = RNode.new_const_node(1)
@@ -521,7 +523,7 @@ def tree_creation_test():
                 for i in range(var_num):
                     if constraint_c[i] == 1:
                         node3_index = i
-                        print("\tCASE4, find node3, node3 id: %d" % (node3_index-1,))
+                        print("\tCASE4, find node3, node3 id: %d" % (node3_index - 1,))
                         break
 
                 # 找到c中最后一个不为0的field的下标
@@ -589,3 +591,10 @@ def tree_creation_test():
             node.print()
 
     return RNode.node_list
+
+
+def node_weight_test():
+    dg = util.graph_generation(RNode.node_list)
+    adj_matrix = util.matrix_generation(dg)
+    pr_vec = util.pr_vector_generation(dg)
+    pr.pagerank(adj_matrix, pr_vec, True)
