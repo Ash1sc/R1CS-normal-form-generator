@@ -51,23 +51,23 @@ class RNode:
         for f in father:
             self.father.append(f)
 
-    def to_string(self):
+    def __str__(self) -> str:
         if self.name == RNode.CONST_NAME:
             return "Node id: %d, name: %s, value: %.2f" % (self.id, self.name, self.const)
         else:
             return "Node id: %d, name: %s, op: %s" % (self.id, self.name, self.op.name)
 
     def print(self):
-        print(self.to_string())
+        print(self)
 
         if len(self.father) > 0:
             print("\tFather:")
             for f in self.father:
-                print("\t\t%s" % (f.to_string(),))
+                print("\t\t%s" % (f,))
         if len(self.child) > 0:
             print("\tChild:")
             for c in self.child:
-                print("\t\t%s" % (c.to_string(),))
+                print("\t\t%s" % (c,))
 
     def add_child(self, c):
         for node in self.child:
