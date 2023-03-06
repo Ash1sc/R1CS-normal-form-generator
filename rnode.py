@@ -41,6 +41,9 @@ class RNode:  # 对于类的定义我们要求首字母大写
         self.const = con
         self.name = name
         self.child = []
+
+        self.weight = 0
+
         for c in child:
             self.child.append(c)
 

@@ -57,3 +57,5 @@ def pagerank(adj_matrix, pr_vec, draw_flag=False):
 
     if draw_flag is True:
         draw(iter_list, pr_list)
+
+    return pr_vec
