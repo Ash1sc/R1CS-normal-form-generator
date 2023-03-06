@@ -51,8 +51,9 @@ def pagerank(adj_matrix, pr_vec, draw_flag=False):
 
         pr_vec = pr_new
 
-    if draw_flag is True:
-        draw(iter_list, pr_list)
 
     print("迭代完成!")
     print("收敛值为:", pr_vec)
+
+    if draw_flag is True:
+        draw(iter_list, pr_list)
