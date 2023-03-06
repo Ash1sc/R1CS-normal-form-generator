@@ -597,4 +597,7 @@ def node_weight_test():
     dg = util.graph_generation(RNode.node_list, True)
     adj_matrix = util.matrix_generation(dg)
     pr_vec = util.pr_vector_generation(dg)
-    pr.pagerank(adj_matrix, pr_vec, True)
+    vec = pr.pagerank(adj_matrix, pr_vec, True)
+
+    for i, node in enumerate(RNode.node_list):
+        node.weight = vec[i]
