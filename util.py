@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 
-TXT_PATH = "./constraint2.txt"
+TXT_PATH = "constraints/constraint2.txt"
 
 
 def make_matrix():
