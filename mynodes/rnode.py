@@ -7,7 +7,7 @@ class Op(Enum):
     MUL = 2
 
 
-class RNode:  # 对于类的定义我们要求首字母大写
+class RNode:
 
     CONST_NAME = "~one"
     node_list = []
@@ -90,14 +90,16 @@ class RNode:  # 对于类的定义我们要求首字母大写
     def remove_child(self, c):
         for node in self.child:
             if node.id == c.id:
-                self.child.remove(node)
+                self.child.remove(c)
+                c.father.remove(self)
                 return True
         return False
 
     def remove_father(self, f):
         for node in self.father:
             if node.id == f.id:
-                self.father.remove(node)
+                self.father.remove(f)
+                f.child.remove(self)
                 return True
         return False
 
