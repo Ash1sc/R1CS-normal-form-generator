@@ -1,6 +1,7 @@
 import util
 import pagerank as pr
-from rnode import *
+from mynodes.rnode import *
+
 
 
 def all_test():
