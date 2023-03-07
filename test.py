@@ -1,25 +1,30 @@
+from typing import List
+
 import util
 import pagerank as pr
 from mynodes.rnode import *
-
+from mynodes.tilenode import *
 
 
 def all_test():
-    print("--------Test begin-------")
+    print("\n\n--------Test begin-------")
 
-    print("-------Matrix test-------")
+    print("\n\n-------Matrix test-------\n\n")
     matrix_test()
 
-    print("---Rnode creation test---")
+    print("\n\n---Rnode creation test---\n\n")
     rnode_creation_test()
 
-    print("---Tree creation test----")
+    print("\n\n---Tree creation test----\n\n")
     tree_creation_test()
 
-    print("----Node weight test-----")
+    print("\n\n----Node weight test-----\n\n")
     node_weight_test()
 
-    print("---------Test end--------")
+    print("\n\n----Cover type-1 test----\n\n")
+    cover_algorithm_1_test()
+
+    print("\n\n---------Test end--------\n\n")
 
 
 def matrix_test():
@@ -39,6 +44,8 @@ def rnode_creation_test():
 
     node2.add_child(node3)
     node2.add_father(node1)
+
+    RNode.node_list.remove(node2)
     for node in RNode.node_list:
         node.print()
 
@@ -47,6 +54,8 @@ def rnode_creation_test():
         node.print()
 
 
+# field * var 改为 const node * var node
+# const node 每次均为新建,所以const node 不会同时存在前驱与后继节点
 def tree_creation_test():
     a, b, c = util.make_matrix()
 
@@ -595,10 +604,64 @@ def tree_creation_test():
 
 
 def node_weight_test():
-    dg = util.graph_generation(RNode.node_list, True)
+    dg = util.graph_generation(RNode.node_list, False)
     adj_matrix = util.matrix_generation(dg)
     pr_vec = util.pr_vector_generation(dg)
-    vec = pr.pagerank(adj_matrix, pr_vec, True)
+    vec = pr.pagerank(adj_matrix, pr_vec, False)
 
     for i, node in enumerate(RNode.node_list):
         node.weight = vec[i]
+
+
+def cover_algorithm_1_test() -> List[TileNode]:
+    res: List[TileNode] = []
+    tile_candidate: List[TileNode] = []
+    tile_num = 1
+
+    # 选择rnode_list中的无子节点的node作为tile_root的candidate
+    root_candidate: List[RNode] = []
+    for node in RNode.node_list:
+        if len(node.child) == 0:
+            root_candidate.append(node)
+
+    while len(root_candidate) != 0:
+        print("************************************************")
+        print("TILE {0}".format(tile_num))
+        tile_num += 1
+
+        s = ""
+        for node in root_candidate:
+            s = s + "node {0},".format(node.id)
+        print("root candidate: " + s)
+
+        print("-------------------------")
+        for node in root_candidate:
+            t_node: TileNode = TileNode.create_tile_node_from_rnode(node)
+            t_node.get_tile()
+            tile_candidate.append(t_node)
+
+        # TODO: tile权重的计算与选取, 目前每次正好只有一个candidate
+        print("-------------------------")
+        tile: TileNode = None
+        tile, tile_id = choose_tile(tile_candidate)
+        print("choose tile {0}, root is rnode {1}".format(tile_id, tile.id))
+        tile.show_tile()
+        res.append(tile)
+
+        # 从RNode DAG中删除所选出的瓦片所包含的边
+        tile.remove_tile_from_tree()
+
+        # 更新root_candidate, 清空tile_candidate:
+        for node in root_candidate:
+            if len(node.father) == 0:
+                root_candidate.remove(node)
+
+        for node in RNode.node_list:
+            if len(node.child) == 0 and len(node.father) != 0:
+                root_candidate.append(node)
+
+        tile_candidate.clear()
+
+    print("************************************************")
+
+    return res

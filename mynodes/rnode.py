@@ -7,7 +7,7 @@ class Op(Enum):
     MUL = 2
 
 
-class RNode:  # 对于类的定义我们要求首字母大写
+class RNode:
 
     CONST_NAME = "~one"
     node_list = []
@@ -51,23 +51,23 @@ class RNode:  # 对于类的定义我们要求首字母大写
         for f in father:
             self.father.append(f)
 
-    def to_string(self):
+    def __str__(self) -> str:
         if self.name == RNode.CONST_NAME:
             return "Node id: %d, name: %s, value: %.2f" % (self.id, self.name, self.const)
         else:
             return "Node id: %d, name: %s, op: %s" % (self.id, self.name, self.op.name)
 
     def print(self):
-        print(self.to_string())
+        print(self)
 
         if len(self.father) > 0:
             print("\tFather:")
             for f in self.father:
-                print("\t\t%s" % (f.to_string(),))
+                print("\t\t%s" % (f,))
         if len(self.child) > 0:
             print("\tChild:")
             for c in self.child:
-                print("\t\t%s" % (c.to_string(),))
+                print("\t\t%s" % (c,))
 
     def add_child(self, c):
         for node in self.child:
@@ -90,14 +90,16 @@ class RNode:  # 对于类的定义我们要求首字母大写
     def remove_child(self, c):
         for node in self.child:
             if node.id == c.id:
-                self.child.remove(node)
+                self.child.remove(c)
+                c.father.remove(self)
                 return True
         return False
 
     def remove_father(self, f):
         for node in self.father:
             if node.id == f.id:
-                self.father.remove(node)
+                self.father.remove(f)
+                f.child.remove(self)
                 return True
         return False
 
