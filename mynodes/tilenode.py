@@ -4,7 +4,37 @@ from mynodes.rnode import *
 
 
 def choose_tile(tile_list):
-    return tile_list[0], 0
+    quadratic: List[TileNode] = []
+    linear: List[TileNode] = []
+    tiles = None
+
+    res: TileNode = None
+    res_index = 0
+    w: float = 0
+
+    for tile in tile_list:
+        if tile.is_quadratic():
+            quadratic.append(tile)
+        else:
+            linear.append(tile)
+
+    if len(quadratic) > 0:
+        tiles = quadratic
+    else:
+        tiles = linear
+
+    for tile in tiles:
+        new_w = tile.weight()
+        if new_w > w:
+            res = tile
+            w = new_w
+
+    for i, tile in enumerate(tile_list):
+        if tile.id == res.id:
+            res_index = i
+            break
+
+    return res, res_index
 
 
 class TileNode:
@@ -158,10 +188,27 @@ class TileNode:
 
         for node in self.tile_father:
             node.remove_tile_from_tree()
-            c_node=self.rnode
-            f_node=node.rnode
+            c_node = self.rnode
+            f_node = node.rnode
 
             f_node.remove_child(c_node)
 
         self.fresh()
 
+    def is_quadratic(self):
+
+        if len(self.tile_father) == 0:
+            return False
+        elif len(self.tile_father) == 1:
+            return self.rnode.op == Op.MUL and not self.rnode.father[0].is_const()
+        else:
+            return self.rnode.op == Op.MUL and not self.rnode.father[0].is_const() and not self.rnode.father[
+                1].is_const()
+
+    def weight(self) -> float:
+        if len(self.tile_father) == 0:
+            return self.rnode.weight
+        elif len(self.tile_father) == 1:
+            return self.rnode.weight + self.tile_father[0].weight()
+        else:
+            return self.rnode.weight + self.tile_father[0].weight() + self.tile_father[1].weight()
