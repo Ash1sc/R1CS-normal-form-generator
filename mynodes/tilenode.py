@@ -39,12 +39,12 @@ def choose_tile(tile_list):
 
 class TileNode:
 
-    def __init__(self, id, rnode: RNode, field=1, child=[], father=[]):
+    def __init__(self, id, rnode: RNode, field=1):
         self.id = id
         self.rnode: RNode = rnode
         self.field = field
-        self.tile_child = child
-        self.tile_father = father
+        self.tile_child = []
+        self.tile_father = []
 
     def __str__(self):
         return "Tile node created from " + str(self.rnode)
@@ -116,15 +116,15 @@ class TileNode:
 
         # 创建两个father的tile node
         l_father: TileNode = TileNode.create_tile_node_from_rnode(self.rnode.father[0])
-        # print("Tile node %d's left father: %s" % (self.id, str(self.rnode.father[0])))
+        print("Tile node %d's left father: %s" % (self.id, str(self.rnode.father[0])))
 
         r_father: TileNode = None
         if len(self.rnode.father) == 2:
             r_father = TileNode.create_tile_node_from_rnode(self.rnode.father[1])
-            # print("Tile node %d's right father: %s" % (self.id, str(self.rnode.father[1])))
+            print("Tile node %d's right father: %s" % (self.id, str(self.rnode.father[1])))
         else:
             r_father: TileNode = TileNode.create_tile_node_from_rnode(self.rnode.father[0])
-            # print("Tile node %d's right father: %s" % (self.id, str(self.rnode.father[0])))
+            print("Tile node %d's right father: %s" % (self.id, str(self.rnode.father[0])))
 
         # 　在线性约束的瓦片中遇到二次型,退出
         if not flag and (self.rnode.op == Op.MUL) and not (l_father.rnode.is_const()) and not (
@@ -193,17 +193,20 @@ class TileNode:
 
             f_node.remove_child(c_node)
 
-        self.fresh()
+        # self.fresh()
+
+    def is_const(self):
+        return self.rnode.name == RNode.CONST_NAME
 
     def is_quadratic(self):
 
         if len(self.tile_father) == 0:
             return False
         elif len(self.tile_father) == 1:
-            return self.rnode.op == Op.MUL and not self.rnode.father[0].is_const()
+            return self.rnode.op == Op.MUL and not self.tile_father[0].is_const()
         else:
-            return self.rnode.op == Op.MUL and not self.rnode.father[0].is_const() and not self.rnode.father[
-                1].is_const()
+            return self.rnode.op == Op.MUL and (not self.tile_father[0].is_const()) and (
+                not self.tile_father[1].is_const())
 
     def weight(self) -> float:
         if len(self.tile_father) == 0:
@@ -212,3 +215,25 @@ class TileNode:
             return self.rnode.weight + self.tile_father[0].weight()
         else:
             return self.rnode.weight + self.tile_father[0].weight() + self.tile_father[1].weight()
+
+    def create_node_set(self):
+        return self.__create_node_set()
+
+    def __create_node_set(self):
+
+        s = set()
+        if self.is_quadratic():
+            s.add(self.id)
+
+            for f in self.tile_father:
+                s.add(f.id)
+
+        else:
+            stack = [self]
+            while len(stack) != 0:
+                tile_node = stack.pop()
+                s.add(tile_node.id)
+                for f in tile_node.tile_father:
+                    stack.append(f)
+
+        return s

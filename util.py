@@ -2,6 +2,8 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 
+from mynodes.tilenode import *
+
 TXT_PATH = "constraints/constraint2.txt"
 
 
@@ -107,8 +109,7 @@ def draw_network(dg):
 
 
 def graph_generation(node_list, draw_flag=False):
-
-    dg=create_network(node_list)
+    dg = create_network(node_list)
 
     if draw_flag is True:
         draw_network(dg)
@@ -186,3 +187,79 @@ def pr_vector_generation(dg):
     pr_vec = np.array(pr_list)  # 将列表转换为ndarray对象
 
     return pr_vec
+
+
+def create_network_from_tile_node(tile_list: List[TileNode]):
+    quadratic: List[TileNode] = []
+    linear: List[TileNode] = []
+
+    dg = nx.DiGraph()
+
+    for tile in tile_list:
+        if tile.is_quadratic():
+            quadratic.append(tile)
+        else:
+            linear.append(tile)
+
+    s_q = [set() for _ in range(len(quadratic))]
+    s_l = [set() for _ in range(len(linear))]
+
+    # 对于二次约束, 保留原本node
+    for index, tile in enumerate(quadratic):
+
+        dg.add_node("q" + str(tile.id))
+        for f in tile.tile_father:
+            dg.add_node("q" + str(f.id))
+            dg.add_edge("q" + str(f.id), "q" + str(tile.id))
+
+        s_q[index] = tile.create_node_set()
+
+    # 对于线性约束,做一次抽象, 在dg中只保留一个大的node
+    for index, tile in enumerate(linear):
+        dg.add_node("l" + str(index))
+        s_l[index] = tile.create_node_set()
+
+    print(dg.nodes)
+
+    for s in s_l:
+        print(s)
+    for s in s_q:
+        print(s)
+
+    # 加边
+    # 线性与二次之间的边
+    for l_index, l_node in enumerate(s_l):
+        u = -1
+        v = -1
+        # 遍历线性约束抽象node中的每一个节点
+        for l_id in l_node:
+
+            # 当前node是线性约束的根,所以他是线性与二次之间的边的前驱
+            if l_id == linear[l_index].id:
+                u = "l" + str(l_index)
+                for q_index, q_set in enumerate(s_q):
+                    for q_id in q_set:
+                        if q_id == l_id:
+                            dg.add_edge(u, "q" + str(q_id))
+            # 当前node不是线性约束的根,所以他是线性与二次之间的边的后继
+            else:
+                v = "l" + str(index)
+                for q_index, q_set in enumerate(s_q):
+                    for q_id in q_set:
+                        if q_id == l_id:
+                            dg.add_edge("q" + str(q_id), v)
+
+    # 二次和二次之间的边, a*b=c,加入每一个c指向其他节点的ab的边
+    for q_index, q_set in enumerate(s_q):
+        u = "q" + str(quadratic[q_index].id)
+
+        for q_index_2, q_set_2 in enumerate(s_q):
+            if q_index_2 == q_index:
+                continue
+
+            if quadratic[q_index].id in q_set_2 and quadratic[q_index_2].id != quadratic[q_index].id:
+                print("add edge from q%d to q%d" % (quadratic[q_index].id, quadratic[q_index_2].id))
+                dg.add_edge(u, "q" + str(quadratic[q_index_2].id))
+
+
+    print(dg.edges)
