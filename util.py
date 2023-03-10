@@ -158,16 +158,20 @@ def matrix_generation(dg):
     :param dg: 有向图
     :return adj_matrix: 邻接矩阵
     """
-    node_num = dg.number_of_nodes()
+    # node_num = dg.number_of_nodes()
+    #
+    # adj_matrix = np.zeros((node_num, node_num))
+    #
+    # for edge in dg.edges:
+    #     adj_matrix[int(edge[0])][int(edge[1])] = 1
+    #
+    # solve_ranking_leaked(adj_matrix)
+    # calc_out_degree_ratio(adj_matrix)
+    # # print(adj_matrix)
 
-    adj_matrix = np.zeros((node_num, node_num))
-
-    for edge in dg.edges:
-        adj_matrix[int(edge[0])][int(edge[1])] = 1
-
+    adj_matrix = np.array(nx.adjacency_matrix(dg).todense())
     solve_ranking_leaked(adj_matrix)
     calc_out_degree_ratio(adj_matrix)
-    # print(adj_matrix)
     return adj_matrix
 
 
@@ -192,6 +196,8 @@ def pr_vector_generation(dg):
 def create_network_from_tile_node(tile_list: List[TileNode]):
     quadratic: List[TileNode] = []
     linear: List[TileNode] = []
+
+    node_dict={}
 
     dg = nx.DiGraph()
 
@@ -218,8 +224,6 @@ def create_network_from_tile_node(tile_list: List[TileNode]):
     for index, tile in enumerate(linear):
         dg.add_node("l" + str(index))
         s_l[index] = tile.create_node_set()
-
-    print(dg.nodes)
 
     for s in s_l:
         print(s)
@@ -261,5 +265,14 @@ def create_network_from_tile_node(tile_list: List[TileNode]):
                 print("add edge from q%d to q%d" % (quadratic[q_index].id, quadratic[q_index_2].id))
                 dg.add_edge(u, "q" + str(quadratic[q_index_2].id))
 
+    get_init_pr(dg)
 
-    print(dg.edges)
+    return dg
+
+
+def graph_generation_from_tile_node(tile_list: List[TileNode], draw_flag=False):
+    dg = create_network_from_tile_node(tile_list)
+
+    if draw_flag is True:
+        draw_network(dg)
+    return dg
