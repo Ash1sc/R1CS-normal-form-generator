@@ -632,8 +632,6 @@ def cover_algorithm_1_test() -> List[TileNode]:
         print("TILE {0}".format(tile_num))
         tile_num += 1
 
-
-
         s = ""
         for node in root_candidate:
             s = s + "node {0},".format(node.id)
@@ -644,8 +642,6 @@ def cover_algorithm_1_test() -> List[TileNode]:
             t_node: TileNode = TileNode.create_tile_node_from_rnode(node)
             t_node.get_tile()
             tile_candidate.append(t_node)
-
-
 
         # TODO: tile权重的计算与选取, 目前每次正好只有一个candidate
         print("-------------------------")
@@ -658,20 +654,16 @@ def cover_algorithm_1_test() -> List[TileNode]:
         # 从RNode DAG中删除所选出的瓦片所包含的边
         tile.remove_tile_from_tree()
 
-
         # 更新root_candidate, 清空tile_candidate:
         for node in root_candidate:
             if len(node.father) == 0:
                 root_candidate.remove(node)
-
 
         for node in RNode.node_list:
             if len(node.child) == 0 and len(node.father) != 0:
                 root_candidate.append(node)
 
         tile_candidate.clear()
-
-
 
     print("************************************************")
 
@@ -684,14 +676,54 @@ def tile_weight_calc(tiles: List[TileNode]):
         print("************************************************")
     util.create_network_from_tile_node(tiles)
 
-
+    # 为瓦片出啊构建新的数据流图, 并使用pagerank算法计算各节点的权重
     dg = util.graph_generation_from_tile_node(tiles, False)
     adj_matrix = util.matrix_generation(dg)
     pr_vec = util.pr_vector_generation(dg)
     vec = pr.pagerank(adj_matrix, pr_vec, False)
 
+    # 更新node的pr值
     for index, node in enumerate(dg.nodes()):
-        dg.nodes[node]["pr"]=vec[index]
-        print(dg.nodes[node]["pr"])
-        print(dg.nodes[node]["name"])
+        dg.nodes[node]["pr"] = vec[index]
+        # print(dg.nodes[node]["pr"])
+        # print(dg.nodes[node]["name"])
 
+    # 为各个瓦片创建节点集合
+    node_set = [set() for _ in range(len(tiles))]
+
+
+    for index, tile in enumerate(tiles):
+        node_set[index] = tile.create_node_set()
+        print(node_set[index])
+
+    # 计算各瓦片的权重
+    tile_weight = [0 for _ in range(len(tiles))]
+
+    linear_index = 0
+    for index, tile in enumerate(tiles):
+        weight = 0
+
+        # 计算二次瓦片的weight
+        if tile.is_quadratic():
+            if len(node_set[index]) == 3:
+                for i in node_set[index]:
+                    weight += dg.nodes["q" + str(i)]["pr"]
+                weight /= 3
+
+            else:
+                for i in node_set[index]:
+                    if i == tile.id:
+                        weight += dg.nodes["q" + str(i)]["pr"]
+                    else:
+                        weight += dg.nodes["q" + str(i)]["pr"] * 2
+                weight /= 3
+
+        else:
+            weight = dg.nodes["l" + str(linear_index)]["pr"]
+            linear_index += 1
+
+        tile_weight[index] = weight
+
+    print(tile_weight)
+
+    return tile_weight
