@@ -197,8 +197,6 @@ def create_network_from_tile_node(tile_list: List[TileNode]):
     quadratic: List[TileNode] = []
     linear: List[TileNode] = []
 
-    node_dict={}
-
     dg = nx.DiGraph()
 
     for tile in tile_list:
@@ -226,10 +224,10 @@ def create_network_from_tile_node(tile_list: List[TileNode]):
         dg.add_node("l" + str(index), name="l" + str(index))
         s_l[index] = tile.create_node_set()
 
-    for s in s_l:
-        print(s)
-    for s in s_q:
-        print(s)
+    # for s in s_l:
+    #     print(s)
+    # for s in s_q:
+    #     print(s)
 
     # 加边
     # 线性与二次之间的边
@@ -263,7 +261,7 @@ def create_network_from_tile_node(tile_list: List[TileNode]):
                 continue
 
             if quadratic[q_index].id in q_set_2 and quadratic[q_index_2].id != quadratic[q_index].id:
-                print("add edge from q%d to q%d" % (quadratic[q_index].id, quadratic[q_index_2].id))
+                # print("add edge from q%d to q%d" % (quadratic[q_index].id, quadratic[q_index_2].id))
                 dg.add_edge(u, "q" + str(quadratic[q_index_2].id))
 
     get_init_pr(dg)
