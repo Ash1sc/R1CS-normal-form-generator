@@ -213,16 +213,17 @@ def create_network_from_tile_node(tile_list: List[TileNode]):
     # 对于二次约束, 保留原本node
     for index, tile in enumerate(quadratic):
 
-        dg.add_node("q" + str(tile.id))
+        dg.add_node("q" + str(tile.id), name="q" + str(tile.id))
+
         for f in tile.tile_father:
-            dg.add_node("q" + str(f.id))
+            dg.add_node("q" + str(f.id), name="q" + str(f.id))
             dg.add_edge("q" + str(f.id), "q" + str(tile.id))
 
         s_q[index] = tile.create_node_set()
 
     # 对于线性约束,做一次抽象, 在dg中只保留一个大的node
     for index, tile in enumerate(linear):
-        dg.add_node("l" + str(index))
+        dg.add_node("l" + str(index), name="l" + str(index))
         s_l[index] = tile.create_node_set()
 
     for s in s_l:

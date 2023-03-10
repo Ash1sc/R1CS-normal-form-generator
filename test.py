@@ -685,7 +685,13 @@ def tile_weight_calc(tiles: List[TileNode]):
     util.create_network_from_tile_node(tiles)
 
 
-    dg = util.graph_generation_from_tile_node(tiles, True)
+    dg = util.graph_generation_from_tile_node(tiles, False)
     adj_matrix = util.matrix_generation(dg)
     pr_vec = util.pr_vector_generation(dg)
-    vec = pr.pagerank(adj_matrix, pr_vec, True)
+    vec = pr.pagerank(adj_matrix, pr_vec, False)
+
+    for index, node in enumerate(dg.nodes()):
+        dg.nodes[node]["pr"]=vec[index]
+        print(dg.nodes[node]["pr"])
+        print(dg.nodes[node]["name"])
+
