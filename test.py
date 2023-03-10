@@ -22,7 +22,10 @@ def all_test():
     node_weight_test()
 
     print("\n\n----Cover type-1 test----\n\n")
-    cover_algorithm_1_test()
+    tiles = cover_algorithm_1_test()
+
+    print("\n\n----Tile weight test-----\n\n")
+    tile_weight_calc(tiles)
 
     print("\n\n---------Test end--------\n\n")
 
@@ -629,6 +632,8 @@ def cover_algorithm_1_test() -> List[TileNode]:
         print("TILE {0}".format(tile_num))
         tile_num += 1
 
+
+
         s = ""
         for node in root_candidate:
             s = s + "node {0},".format(node.id)
@@ -640,21 +645,25 @@ def cover_algorithm_1_test() -> List[TileNode]:
             t_node.get_tile()
             tile_candidate.append(t_node)
 
+
+
         # TODO: tile权重的计算与选取, 目前每次正好只有一个candidate
         print("-------------------------")
         tile: TileNode = None
         tile, tile_id = choose_tile(tile_candidate)
         print("choose tile {0}, root is rnode {1}".format(tile_id, tile.id))
-        tile.show_tile()
-        res.append(tile)
 
+        res.append(tile)
+        tile.show_tile()
         # 从RNode DAG中删除所选出的瓦片所包含的边
         tile.remove_tile_from_tree()
+
 
         # 更新root_candidate, 清空tile_candidate:
         for node in root_candidate:
             if len(node.father) == 0:
                 root_candidate.remove(node)
+
 
         for node in RNode.node_list:
             if len(node.child) == 0 and len(node.father) != 0:
@@ -662,6 +671,27 @@ def cover_algorithm_1_test() -> List[TileNode]:
 
         tile_candidate.clear()
 
+
+
     print("************************************************")
 
     return res
+
+
+def tile_weight_calc(tiles: List[TileNode]):
+    for tile in tiles:
+        tile.show_tile()
+        print("************************************************")
+    util.create_network_from_tile_node(tiles)
+
+
+    dg = util.graph_generation_from_tile_node(tiles, False)
+    adj_matrix = util.matrix_generation(dg)
+    pr_vec = util.pr_vector_generation(dg)
+    vec = pr.pagerank(adj_matrix, pr_vec, False)
+
+    for index, node in enumerate(dg.nodes()):
+        dg.nodes[node]["pr"]=vec[index]
+        print(dg.nodes[node]["pr"])
+        print(dg.nodes[node]["name"])
+
