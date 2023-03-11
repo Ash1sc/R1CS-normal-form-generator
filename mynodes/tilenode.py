@@ -135,8 +135,8 @@ class TileNode:
 
         # CASE1: 二次约束的瓦片, 直接返回最简单的a*b=c
         if flag and (self.rnode.op == Op.MUL) and not (l_father.rnode.is_const()) and not (r_father.rnode.is_const()):
-            self.add_father(l_father)
-            self.add_father(r_father)
+            self.add_father(l_father.__get_mul_const_list_tile())
+            self.add_father(r_father.__get_mul_const_list_tile())
 
             print("CASE1, find a quadratic tile")
             print("\tTile node %d * tile node %d = tile node %d" % (l_father.id, r_father.id, self.id))
@@ -173,6 +173,24 @@ class TileNode:
         else:
             print("Tile node %d don't have fathers, end" % (self.id,))
             return self
+
+    def __get_mul_const_list_tile(self):
+
+        if self.rnode.op != Op.MUL:
+            return self
+
+        # 本函数找的是整数与变量相乘的链, 当且仅当自身的father为2时,有可能是证书与变量或者整数与整数相乘所得
+        if len(self.rnode.father) != 2:
+            return self
+
+        # 本身为乘,且有两个father
+        l_father = self.create_tile_node_from_rnode(self.rnode.father[0])
+        r_father = self.create_tile_node_from_rnode(self.rnode.father[1])
+
+        self.add_father(l_father.__get_mul_const_list_tile())
+        self.add_father(r_father.__get_mul_const_list_tile())
+
+        return self
 
     def show_tile(self):
         self.__show_tile(1)
