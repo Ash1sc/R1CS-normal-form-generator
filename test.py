@@ -4,6 +4,7 @@ import util
 import pagerank as pr
 from mynodes.rnode import *
 from mynodes.tilenode import *
+from consgen import *
 
 
 def all_test():
@@ -25,6 +26,9 @@ def all_test():
     tiles = cover_algorithm_1_test()
 
     print("\n\n----Tile weight test-----\n\n")
+    tile_weight_calc(tiles)
+
+    print("\n\n----Cons generation test-----\n\n")
     tile_weight_calc(tiles)
 
     print("\n\n---------Test end--------\n\n")
@@ -691,7 +695,6 @@ def tile_weight_calc(tiles: List[TileNode]):
     # 为各个瓦片创建节点集合
     node_set = [set() for _ in range(len(tiles))]
 
-
     for index, tile in enumerate(tiles):
         node_set[index] = tile.create_node_set()
         print(node_set[index])
@@ -727,3 +730,9 @@ def tile_weight_calc(tiles: List[TileNode]):
     print(tile_weight)
 
     return tile_weight
+
+
+def constraint_generation(tile_list: List[TileNode], tile_weight: List[float]):
+    consgen = Consgen(tile_list, tile_weight)
+    res = consgen.cons_generation()
+    return res
