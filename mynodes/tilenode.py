@@ -135,8 +135,8 @@ class TileNode:
 
         # CASE1: 二次约束的瓦片, 直接返回最简单的a*b=c
         if flag and (self.rnode.op == Op.MUL) and not (l_father.rnode.is_const()) and not (r_father.rnode.is_const()):
-            self.add_father(l_father.__get_mul_const_list_tile())
-            self.add_father(r_father.__get_mul_const_list_tile())
+            self.add_father(l_father)
+            self.add_father(r_father)
 
             print("CASE1, find a quadratic tile")
             print("\tTile node %d * tile node %d = tile node %d" % (l_father.id, r_father.id, self.id))
