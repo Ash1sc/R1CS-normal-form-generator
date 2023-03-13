@@ -6,6 +6,8 @@ from mynodes.rnode import *
 from mynodes.tilenode import *
 from consgen import *
 
+from weight_calculator import *
+
 
 def all_test():
     print("\n\n--------Test begin-------")
@@ -611,10 +613,14 @@ def tree_creation_test():
 
 
 def node_weight_test():
-    dg = util.graph_generation(RNode.node_list, False)
-    adj_matrix = util.matrix_generation(dg)
-    pr_vec = util.pr_vector_generation(dg)
-    vec = pr.pagerank(adj_matrix, pr_vec, False)
+    # dg = util.graph_generation(RNode.node_list, False)
+    # adj_matrix = util.matrix_generation(dg)
+    # pr_vec = util.pr_vector_generation(dg)
+    # vec = pr.pagerank(adj_matrix, pr_vec, False)
+
+    w_calc = Weight_Calculator(False, False)
+    w_calc.graph_generation_from_rnode(RNode.node_list)
+    vec = w_calc.pgrank_calculation()
 
     for i, node in enumerate(RNode.node_list):
         node.weight = vec[i]
@@ -678,13 +684,17 @@ def tile_weight_calc(tiles: List[TileNode]):
     for tile in tiles:
         tile.show_tile()
         print("************************************************")
-    util.create_network_from_tile_node(tiles)
 
     # 为瓦片构建新的数据流图, 并使用pagerank算法计算各节点的权重
-    dg = util.graph_generation_from_tile_node(tiles, True)
-    adj_matrix = util.matrix_generation(dg)
-    pr_vec = util.pr_vector_generation(dg)
-    vec = pr.pagerank(adj_matrix, pr_vec, False)
+    # dg = util.graph_generation_from_tile_node(tiles, True)
+    # adj_matrix = util.matrix_generation(dg)
+    # pr_vec = util.pr_vector_generation(dg)
+    # vec = pr.pagerank(adj_matrix, pr_vec, False)
+
+    w_calc = Weight_Calculator(True, True)
+    w_calc.graph_generation_from_tile_node(tiles)
+    vec = w_calc.pgrank_calculation()
+    dg = w_calc.dg
 
     # 设置rnode的degree
     print(dg.in_degree())
