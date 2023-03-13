@@ -42,7 +42,9 @@ class RNode:
         self.name = name
         self.child = []
 
+        # 在对linear约束进一步抽象后获得的有向图的性质,仅quodratic约束相关节点拥有
         self.weight = 0
+        self.degree = 0
 
         for c in child:
             self.child.append(c)

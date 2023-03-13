@@ -49,6 +49,17 @@ class TileNode:
     def __str__(self):
         return "Tile node created from " + str(self.rnode)
 
+    def __gt__(self, other):
+        if self.rnode.degree > other.rnode.degree:
+            return True
+        elif self.rnode.degree < other.rnode.degree:
+            return False
+        else:
+            if self.rnode.weight > other.rnode.weight:
+                return True
+            else:
+                return False
+
     @classmethod
     def create_tile_node_from_rnode(cls, rnode: RNode):
         node = TileNode(rnode.id, rnode)
@@ -255,3 +266,6 @@ class TileNode:
                     stack.append(f)
 
         return s
+
+    def betweeness(self):
+        return self.rnode.degree

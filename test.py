@@ -680,19 +680,23 @@ def tile_weight_calc(tiles: List[TileNode]):
         print("************************************************")
     util.create_network_from_tile_node(tiles)
 
-    # 为瓦片出啊构建新的数据流图, 并使用pagerank算法计算各节点的权重
-    dg = util.graph_generation_from_tile_node(tiles, False)
+    # 为瓦片构建新的数据流图, 并使用pagerank算法计算各节点的权重
+    dg = util.graph_generation_from_tile_node(tiles, True)
     adj_matrix = util.matrix_generation(dg)
     pr_vec = util.pr_vector_generation(dg)
     vec = pr.pagerank(adj_matrix, pr_vec, False)
 
+    # 设置rnode的degree
+    print(dg.in_degree())
+    print(dg.out_degree())
 
-    # 设置 rnode中quadratic的weight
+    # 设置 rnode中quadratic的weight 和 degree
     for index, node in enumerate(dg.nodes()):
         if dg.nodes[node]["name"].startswith("q"):
             id = int(dg.nodes[node]["name"][1:])
             RNode.node_list[id].weight = vec[index]
-            print("set q%d's weight: %f" % (id, vec[index]))
+            RNode.node_list[id].degree = dg.out_degree[dg.nodes[node]["name"]] + dg.in_degree[dg.nodes[node]["name"]]
+            # print("set q%d's degree: %d" % (id, RNode.node_list[id].degree))
 
     # 更新node的pr值
     for index, node in enumerate(dg.nodes()):
