@@ -121,25 +121,36 @@ class Consgen:
                 if len(tile.tile_father) >= 2:
                     rf_id = tile.tile_father[1].id
 
-                print("%d, %d, %d" % (child_id, lf_id, rf_id))
-                rf_index = self.__get_index(rf_id)
-                lf_index = self.__get_index(lf_id)
-                child_index = self.__get_index(child_id)
+                # print("lf_id: %d, rf_id: %d, child_id:%d" % (lf_id, rf_id, child_id))
 
-                print(print("lf_index: %d, rf_index: %d, child_index:%d" % (child_index, lf_index, rf_index)))
+                # 确保betweeness 大的父节点一定在约束组中的位置更加前面
+                if lf_id != rf_id and tile.tile_father[0] > tile.tile_father[1]:
+                    # print("lf betweeness: %d, rf betweeness: %d" % (
+                    # tile.tile_father[0].betweeness(), tile.tile_father[1].betweeness()))
+                    lf_index = self.__get_index(lf_id)
+                    rf_index = self.__get_index(rf_id)
+                    child_index = self.__get_index(child_id)
+                else:
+                    # if lf_id != rf_id:
+                    # print("lf betweeness: %d, rf betweeness: %d" % (
+                    # tile.tile_father[0].betweeness(), tile.tile_father[1].betweeness()))
+                    rf_index = self.__get_index(rf_id)
+                    lf_index = self.__get_index(lf_id)
+                    child_index = self.__get_index(child_id)
+
+                # print("lf_index: %d, rf_index: %d, child_index:%d" % (lf_index, rf_index, child_index))
 
                 a_dict = dict()
                 b_dict = dict()
                 c_dict = dict()
 
                 c_dict[child_index] = 1
-
-                if rf_index < lf_index:
+                if lf_index < rf_index:
+                    a_dict[lf_index] = 1
+                    b_dict[rf_index] = 1
+                else:
                     a_dict[rf_index] = 1
                     b_dict[lf_index] = 1
-                else:
-                    b_dict[rf_index] = 1
-                    a_dict[lf_index] = 1
 
                 self.__add_constraint(a_dict, b_dict, c_dict)
 
