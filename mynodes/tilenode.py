@@ -49,6 +49,7 @@ class TileNode:
     def __str__(self):
         return "Tile node created from " + str(self.rnode)
 
+    # 仅在瓦片内部比较的时候使用
     def __gt__(self, other):
         if self.rnode.degree > other.rnode.degree:
             return True
