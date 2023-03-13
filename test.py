@@ -26,10 +26,10 @@ def all_test():
     tiles = cover_algorithm_1_test()
 
     print("\n\n----Tile weight test-----\n\n")
-    tile_weight_calc(tiles)
+    tile_weight = tile_weight_calc(tiles)
 
     print("\n\n----Cons generation test-----\n\n")
-    tile_weight_calc(tiles)
+    constraint_generation(tiles, tile_weight)
 
     print("\n\n---------Test end--------\n\n")
 
@@ -685,6 +685,14 @@ def tile_weight_calc(tiles: List[TileNode]):
     adj_matrix = util.matrix_generation(dg)
     pr_vec = util.pr_vector_generation(dg)
     vec = pr.pagerank(adj_matrix, pr_vec, False)
+
+
+    # 设置 rnode中quadratic的weight
+    for index, node in enumerate(dg.nodes()):
+        if dg.nodes[node]["name"].startswith("q"):
+            id = int(dg.nodes[node]["name"][1:])
+            RNode.node_list[id].weight = vec[index]
+            print("set q%d's weight: %f" % (id, vec[index]))
 
     # 更新node的pr值
     for index, node in enumerate(dg.nodes()):
