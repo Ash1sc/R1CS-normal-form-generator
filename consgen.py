@@ -154,6 +154,9 @@ class Consgen:
 
                 self.__add_constraint(a_dict, b_dict, c_dict)
 
+            else:
+                print("oops!This is a linear constraint")
+
         for cons in self.cons_list:
             cons.show()
 
