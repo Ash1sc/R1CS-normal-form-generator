@@ -16,12 +16,34 @@ class Tile_n_weight:
 
     def __gt__(self, other):
         # quadratic的瓦片永远大于linear的瓦片
-        if self.tile.is_quadratic() and not other.tile.is_quadratic():
-            return True
-        elif not self.tile.is_quadratic() and other.tile.is_quadratic():
-            return False
+        # if self.tile.is_quadratic() and not other.tile.is_quadratic():
+        #     return True
+        # elif not self.tile.is_quadratic() and other.tile.is_quadratic():
+        #     return False
+        # else:
+        #     # 同种类型的瓦片,比较weight的大小
+        #     return self.weight > other.weight
+
+        # quadratic > linear with mul root >linear with add root
+        self_level = 0
+        other_level = 0
+        if self.tile.is_quadratic():
+            self_level = 3
+        elif self.tile.rnode.op == Op.MUL:
+            self_level = 2
         else:
-            # 同种类型的瓦片,比较weight的大小
+            self_level = 1
+
+        if other.tile.is_quadratic():
+            other_level = 3
+        elif other.tile.rnode.op == Op.MUL:
+            other_level = 2
+        else:
+            other_level = 1
+
+        if not self_level == other_level:
+            return self_level > other_level
+        else:
             return self.weight > other.weight
 
 
@@ -156,6 +178,8 @@ class Consgen:
 
             else:
                 print("oops!This is a linear constraint")
+
+                # if tile.rnode.op == Op.MUL:
 
         for cons in self.cons_list:
             cons.show()
