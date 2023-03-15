@@ -125,6 +125,38 @@ class Consgen:
         new_con.set_constraint(a_dict, b_dict, c_dict)
         self.cons_list.append(new_con)
 
+    def __get_mul_linear_dict(self, tile):
+        field = 1
+        node_id = 0
+
+        target = tile
+        while not len(target.tile_father) == 0:
+            l_father = target.tile_father[0]
+            r_father = target.tile_father[1]
+
+            if l_father.rnode.is_const() and not r_father.rnode.is_const():
+                field = field * l_father.rnode.const
+                node_id = r_father.rnode.id
+                target = r_father
+            elif r_father.rnode.is_const() and not l_father.rnode.is_const():
+                field = field * r_father.rnode.const
+                node_id = l_father.rnode.id
+                target = l_father
+            else:
+                field = field * l_father.rnode.const * r_father.rnode.const
+                node_id = 0
+                break
+
+        a_dict = dict()
+        b_dict = dict()
+        c_dict = dict()
+
+        a_dict[0] = field
+        b_dict[self.__get_index(node_id)] = 1
+        c_dict[self.__get_index(self.rnode.id)] = 1
+
+        return a_dict, b_dict, c_dict
+
     def cons_generation(self):
 
         for tw in self.tw_list:
@@ -179,7 +211,17 @@ class Consgen:
             else:
                 print("oops!This is a linear constraint")
 
-                # if tile.rnode.op == Op.MUL:
+                # tile: (*) - 4
+                #           \ (*) - 5
+                #                 \ (*) - 3
+                #                       \ 4
+                if tile.rnode.op == Op.MUL:
+                    a_dict, b_dict, c_dict = self.__get_mul_linear_dict(tile)
+                    self.__add_constraint(a_dict, b_dict, c_dict)
+
+                else:
+                    # node id 到 field 的dict
+                    field_set=dict()
 
         for cons in self.cons_list:
             cons.show()
