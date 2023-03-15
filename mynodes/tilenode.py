@@ -173,6 +173,8 @@ class TileNode:
                 self.add_father(r_father)
                 print("CASE2, %d * tile node %d = tile node %d" % (r_father.rnode.const, l_father.id, self.id))
 
+            return self
+
         # node为加法, 继续连加
         elif self.rnode.op == Op.ADD:
             print("Tile node %d's op is ADD, l_father: %d, r_father: %d" % (
