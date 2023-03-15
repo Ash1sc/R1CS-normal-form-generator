@@ -147,15 +147,75 @@ class Consgen:
                 node_id = 0
                 break
 
-        a_dict = dict()
-        b_dict = dict()
-        c_dict = dict()
+        val_id = node_id
+        res_id = tile.rnode.id
 
-        a_dict[0] = field
-        b_dict[self.__get_index(node_id)] = 1
-        c_dict[self.__get_index(self.rnode.id)] = 1
+        return field, val_id, res_id
 
-        return a_dict, b_dict, c_dict
+    def __get_add_linear_field_dict(self, tile):
+
+        res = dict()
+        stack = [tile]
+        const = 0
+        while len(stack) != 0:
+            tile_node = stack.pop()
+
+            print("Tile id: %d" % (tile_node.id,))
+
+            # 根节点,自身field为-1
+            if tile_node.id == tile.id:
+                res[tile_node.id] = -1
+
+            # Op = ADD
+            # 中间节点, 将父节点添加至stack
+            if tile_node.rnode.op == Op.ADD:
+
+                print("\tTile node id %d, op is ADD" % (tile_node.id,))
+                for f in tile_node.tile_father:
+                    stack.append(f)
+                    print("\t\tAdd father tile node id %d to the stack" % (f.id,))
+
+            # Op = MUL
+            elif tile_node.rnode.op == Op.MUL:
+                if len(tile_node.tile_father) != 0:
+                    field, val_id, res_id = self.__get_mul_linear_dict(tile_node)
+                    if not val_id in res:
+                        res[val_id] = field
+                    else:
+                        res[val_id] = field + res[val_id]
+
+                    print("\tTile node id %d, op is MUL, created by const mul list" % (tile_node.id,))
+                    print("\tSet node %id's field to %d" % (val_id, res[val_id]))
+
+                else:
+                    if not tile_node.id in res:
+                        res[tile_node.id] = 1
+                    else:
+                        res[tile_node.id] = 1 + res[tile_node.id]
+                        print("\tTile node id %d, op is MUL, created by quadratic tile" % (tile_node.id,))
+                        print("\tSet node %id's field to %d" % (tile_node.id, res[tile_node.id]))
+
+
+            # Op = None
+            # 常数节点, 通通加到index=0
+            elif tile_node.rnode.is_const():
+
+                const += tile_node.rnode.const
+
+                print("\tTile node id %d, is const" % (tile_node.id,))
+                print("\tSet const field to %d" % (const, ))
+
+            # 　无父结点，将自身的 field + 1
+            elif len(tile_node.tile_father) == 0:
+                if not tile_node.id in res:
+                    res[tile_node.id] = 1
+                else:
+                    res[tile_node.id] = 1 + res[tile_node.id]
+
+                print("\tTile node id %d, is variable" % (tile_node.id,))
+                print("\tSet node %d's field to %d" % (tile_node.id, res[tile_node.id]))
+
+        return res, const
 
     def cons_generation(self):
 
@@ -216,12 +276,38 @@ class Consgen:
                 #                 \ (*) - 3
                 #                       \ 4
                 if tile.rnode.op == Op.MUL:
-                    a_dict, b_dict, c_dict = self.__get_mul_linear_dict(tile)
+                    field, val_id, res_id = self.__get_mul_linear_dict(tile)
+
+                    a_dict = dict()
+                    b_dict = dict()
+                    c_dict = dict()
+
+                    val_index = self.__get_index(val_id)
+                    res_index = self.__get_index(res_id)
+
+                    a_dict[0] = field
+                    b_dict[val_index] = 1
+                    c_dict[res_index] = 1
+
                     self.__add_constraint(a_dict, b_dict, c_dict)
 
                 else:
                     # node id 到 field 的dict
-                    field_set=dict()
+                    field_dict, const = self.__get_add_linear_field_dict(tile)
+
+                    print(field_dict, const)
+
+                    a_dict = dict()
+                    b_dict = dict()
+                    c_dict = dict()
+                    for key, value in field_dict.items():
+                        index = self.__get_index(key)
+                        a_dict[index] = value
+                    a_dict[0] = const
+
+                    b_dict[0] = 1
+
+                    self.__add_constraint(a_dict, b_dict, c_dict)
 
         for cons in self.cons_list:
             cons.show()
