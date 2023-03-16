@@ -219,7 +219,8 @@ class TileNode:
     def remove_tile_from_tree(self):
 
         for node in self.tile_father:
-            node.remove_tile_from_tree()
+            if len(node.rnode.child) == 1:
+                node.remove_tile_from_tree()
             c_node = self.rnode
             f_node = node.rnode
 
