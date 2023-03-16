@@ -206,7 +206,6 @@ class Weight_Calculator:
             v = -1
             # 遍历线性约束抽象node中的每一个节点
             for l_id in l_node:
-
                 # 当前node是线性约束的根,所以他是线性与二次之间的边的前驱
                 if l_id == linear[l_index].id:
                     u = "l" + str(l_index)
@@ -216,9 +215,11 @@ class Weight_Calculator:
                                 self.dg.add_edge(u, "q" + str(q_id))
                 # 当前node不是线性约束的根,所以他是线性与二次之间的边的后继
                 else:
-                    v = "l" + str(index)
+                    v = "l" + str(l_index)
                     for q_index, q_set in enumerate(s_q):
+                        # print("l%d, q%d:" % (l_index, q_index))
                         for q_id in q_set:
+                            # print("\tq_id: %d,l_id: %d" % (q_id, l_id))
                             if q_id == l_id:
                                 self.dg.add_edge("q" + str(q_id), v)
 
@@ -233,6 +234,25 @@ class Weight_Calculator:
                 if quadratic[q_index].id in q_set_2 and quadratic[q_index_2].id != quadratic[q_index].id:
                     # print("add edge from q%d to q%d" % (quadratic[q_index].id, quadratic[q_index_2].id))
                     self.dg.add_edge(u, "q" + str(quadratic[q_index_2].id))
+
+
+        # 线性与线性之间的边:
+        for l_index1, l_node1 in enumerate(s_l):
+            for l_index2, l_node2 in enumerate(s_l):
+
+                if l_index1==l_index2:
+                    continue
+
+                flag=False
+                for l_id1 in l_node1:
+                    if l_id1 in l_node2:
+                        flag=True
+                        break
+
+                if flag:
+                    self.dg.add_edge("l" + str(l_index1), "l" + str(l_index2))
+
+
 
         self.__get_init_pr()
 

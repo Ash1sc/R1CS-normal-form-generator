@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from mynodes.tilenode import *
 
-TXT_PATH = "constraints/constraint2.txt"
+TXT_PATH = "constraints/constraints.txt"
 
 
 def make_matrix():

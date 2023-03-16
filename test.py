@@ -665,9 +665,7 @@ def cover_algorithm_1_test() -> List[TileNode]:
         tile.remove_tile_from_tree()
 
         # 更新root_candidate, 清空tile_candidate:
-        for node in root_candidate:
-            if len(node.father) == 0:
-                root_candidate.remove(node)
+        root_candidate.clear()
 
         for node in RNode.node_list:
             if len(node.child) == 0 and len(node.father) != 0:
