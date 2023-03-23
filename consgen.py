@@ -6,6 +6,19 @@ from functools import total_ordering
 
 
 @total_ordering
+class Index_and_weight:
+    def __init__(self, index=0, weight=0):
+        self.index: float = index
+        self.weight: float = weight
+
+    def __gt__(self, other):
+        return self.weight > other.weight
+
+    def __eq__(self, other):
+        return self.weight == other.weight
+
+
+@total_ordering
 class Tile_n_weight:
     def __init__(self, tile: TileNode = None, weight: float = 0):
         self.tile: TileNode = tile
@@ -83,6 +96,24 @@ class Constraint:
         print("b: ", self.b)
         print("c: ", self.c)
 
+    def swap_row(self, i, j):
+        tmp = self.a[i]
+        self.a[i] = self.a[j]
+        self.a[j] = tmp
+
+        tmp = self.b[i]
+        self.b[i] = self.b[j]
+        self.b[j] = tmp
+
+        tmp = self.c[i]
+        self.c[i] = self.c[j]
+        self.c[j] = tmp
+
+    def set_row(self, i, j):
+        self.a[i] = self.a[j]
+        self.b[i] = self.b[j]
+        self.c[i] = self.c[j]
+
 
 class Consgen:
 
@@ -93,6 +124,11 @@ class Consgen:
         # 0预留给~one变量
         self.current_index = 1
 
+        #  quadratic constraint中使用的最大的index
+        self.__max_q_index = -1
+        self.__max_q_cons_id = -1
+        self.cons_num = 0
+
         # node id 到 矩阵中的列数
         self.dict = dict()
 
@@ -100,6 +136,48 @@ class Consgen:
             self.tw_list.append(Tile_n_weight(tile_list[index], weight_list[index]))
 
         self.tw_list.sort(reverse=True)
+
+    def __quick_sort(self, iw: List[Index_and_weight], i, j):
+        if i >= j:
+            return list
+        pivot = Index_and_weight(iw[i].index, iw[i].weight)
+
+        low = i
+        high = j
+        while i < j:
+            while i < j and iw[j].weight >= pivot.weight:
+                j -= 1
+            iw[i] = iw[j]
+            self.__set_row(i, j)
+            while i < j and iw[i].weight <= pivot.weight:
+                i += 1
+            iw[j] = iw[i]
+            self.__set_row(j, i)
+        iw[j] = pivot
+        self.cons_list[j] = pivot
+        self.__quick_sort(iw, low, i - 1)
+        self.__quick_sort(iw, i + 1, high)
+
+    def __swap_row(self, i, j):
+
+        index = self.dict[i]
+        self.dict[i] = self.dict[j]
+        self.dict[j] = self.dict[i]
+
+        for cons in self.cons_list:
+            cons.swap_row(i, j)
+
+    def __set_row(self, i, j):
+
+        self.dict[i] = self.dict[j]
+
+        for cons in self.cons_list:
+            cons.set_row(i, j)
+
+    def __swap_line(self, i, j):
+        tmp = self.cons_list[i]
+        self.cons_list[i] = self.cons_list[j]
+        self.cons_list[j] = tmp
 
     def __get_index(self, id):
 
@@ -124,6 +202,8 @@ class Consgen:
         new_con = Constraint(self.current_index)
         new_con.set_constraint(a_dict, b_dict, c_dict)
         self.cons_list.append(new_con)
+
+        self.cons_num += 1
 
     def __get_mul_linear_dict(self, tile):
         field = 1
@@ -203,7 +283,7 @@ class Consgen:
                 const += tile_node.rnode.const
 
                 print("\tTile node id %d, is const" % (tile_node.id,))
-                print("\tSet const field to %d" % (const, ))
+                print("\tSet const field to %d" % (const,))
 
             # 　无父结点，将自身的 field + 1
             elif len(tile_node.tile_father) == 0:
@@ -229,6 +309,9 @@ class Consgen:
             # quadratic 直接利用
             # quadratic 一定是1,1,1的field
             if tile.is_quadratic():
+
+                self.__max_q_cons_id += 1
+
                 child_id = tile.id
                 lf_id = tile.tile_father[0].id
                 rf_id = tile.tile_father[0].id
@@ -252,6 +335,9 @@ class Consgen:
                     lf_index = self.__get_index(lf_id)
                     child_index = self.__get_index(child_id)
 
+                # 记录max_q_index, 对max_q_index两边的row,即在quadratic和linear中出现的节点分别进行排序
+                self.__max_q_index = max(rf_index, lf_index, child_index, self.__max_q_index)
+
                 # print("lf_index: %d, rf_index: %d, child_index:%d" % (lf_index, rf_index, child_index))
 
                 a_dict = dict()
@@ -269,8 +355,6 @@ class Consgen:
                 self.__add_constraint(a_dict, b_dict, c_dict)
 
             else:
-                print("oops!This is a linear constraint")
-
                 # tile: (*) - 4
                 #           \ (*) - 5
                 #                 \ (*) - 3
@@ -308,6 +392,26 @@ class Consgen:
                     b_dict[0] = 1
 
                     self.__add_constraint(a_dict, b_dict, c_dict)
+
+        # 调整linear constraint中的列数顺序
+        start_index = self.__max_q_index + 1
+        end_index = len(self.cons_list[0].a) - 1
+
+        # 计算linear constraint中新增变量的weight = Σ(field * tile weight)
+        iw_list: List[Index_and_weight] = []
+        for cur_index in range(start_index, end_index + 1):
+            weight = 0
+            for cons_index in range(self.__max_q_cons_id + 1, self.cons_num):
+                weight = weight + (self.cons_list[cons_index].a[cur_index] + self.cons_list[cons_index].b[cur_index] +
+                                   self.cons_list[cons_index].c[cur_index]) * self.tw_list[cons_index].weight
+
+            iw_list.append(Index_and_weight(cur_index, weight))
+
+        self.__quick_sort(iw_list, 0, len(iw_list) - 1)
+
+        # 调整quadratic constraint中的列数顺序
+        start_index = 0
+        end_index = self.__max_q_index
 
         for cons in self.cons_list:
             cons.show()
