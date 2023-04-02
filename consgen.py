@@ -256,8 +256,11 @@ class Consgen:
             print("Tile id: %d" % (tile_node.id,))
 
             # 根节点,自身field为-1
-            if tile_node.id == tile.id:
+            # 根节点,自身field为-1
+            if tile_node.id == tile.id and not tile_node.rnode.is_const():
                 res[tile_node.id] = -1
+            elif tile_node.id == tile.id and not tile_node.rnode.is_const():
+                const = -1
 
             # Op = ADD
             # 中间节点, 将父节点添加至stack

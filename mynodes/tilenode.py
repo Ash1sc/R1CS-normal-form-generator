@@ -1,5 +1,5 @@
 from typing import List
-
+import numpy as np
 from mynodes.rnode import *
 
 
@@ -273,3 +273,106 @@ class TileNode:
 
     def betweeness(self):
         return self.rnode.degree
+
+    def __get_mul_linear_dict(self) -> (int, float):
+        field = 1
+        node_id = 0
+
+        target = self
+        while not len(target.tile_father) == 0:
+            l_father = target.tile_father[0]
+            r_father = target.tile_father[1]
+
+            if l_father.rnode.is_const() and not r_father.rnode.is_const():
+                field = field * l_father.rnode.const
+                node_id = r_father.rnode.id
+                target = r_father
+            elif r_father.rnode.is_const() and not l_father.rnode.is_const():
+                field = field * r_father.rnode.const
+                node_id = l_father.rnode.id
+                target = l_father
+            else:
+                field = field * l_father.rnode.const * r_father.rnode.const
+                node_id = 0
+                break
+
+        val_id = node_id
+
+        return val_id, field
+
+    def get_pg_weight(self) -> float:
+
+        if self.is_quadratic() or len(self.tile_father) == 0:
+            return 1.0
+
+        l: List[float] = []
+        if self.rnode.op == Op.MUL:
+            field, _ = self.__get_mul_linear_dict()
+            l.append(float(-1))
+            l.append(float(field))
+
+        else:
+            res = dict()
+            stack = [self]
+            const = 0
+            while len(stack) != 0:
+                tile_node = stack.pop()
+
+                print("Tile id: %d" % (tile_node.id,))
+
+                # 根节点,自身field为-1
+                if tile_node.id == self.id and not tile_node.rnode.is_const():
+                    res[tile_node.id] = -1
+                elif tile_node.id == self.id and not tile_node.rnode.is_const():
+                    const = -1
+
+                # Op = ADD
+                # 中间节点, 将父节点添加至stack
+                if tile_node.rnode.op == Op.ADD:
+
+                    for f in tile_node.tile_father:
+                        stack.append(f)
+
+                # Op = MUL
+                elif tile_node.rnode.op == Op.MUL:
+                    if len(tile_node.tile_father) != 0:
+                        val_id, field = self.__get_mul_linear_dict()
+                        if not val_id in res:
+                            res[val_id] = field
+                        else:
+                            res[val_id] = field + res[val_id]
+
+                    else:
+                        if not tile_node.id in res:
+                            res[tile_node.id] = 1
+                        else:
+                            res[tile_node.id] = 1 + res[tile_node.id]
+
+
+                # Op = None
+                # 常数节点, 通通加到index=0
+                elif tile_node.rnode.is_const():
+
+                    const += tile_node.rnode.const
+
+                # 　无父结点，将自身的 field + 1
+                elif len(tile_node.tile_father) == 0:
+                    if not tile_node.id in res:
+                        res[tile_node.id] = 1
+                    else:
+                        res[tile_node.id] = 1 + res[tile_node.id]
+
+            for key, value in res.items():
+                l.append(float(value))
+            l.append(float(const))
+
+        # 标准化
+        sig: float = 0.0
+        for i in l:
+            sig = sig + i * i
+        sig = np.sqrt(sig)
+
+        for index, _ in enumerate(l):
+            l[index] = l[index]/ sig
+
+        return np.std(l)

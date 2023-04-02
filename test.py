@@ -618,7 +618,7 @@ def node_weight_test():
     # pr_vec = util.pr_vector_generation(dg)
     # vec = pr.pagerank(adj_matrix, pr_vec, False)
 
-    w_calc = Weight_Calculator(False, False)
+    w_calc = Weight_Calculator(False, False, False)
     w_calc.graph_generation_from_rnode(RNode.node_list)
     vec = w_calc.pgrank_calculation()
 
@@ -689,14 +689,11 @@ def tile_weight_calc(tiles: List[TileNode]):
     # pr_vec = util.pr_vector_generation(dg)
     # vec = pr.pagerank(adj_matrix, pr_vec, False)
 
-    w_calc = Weight_Calculator(True, True)
+    w_calc = Weight_Calculator(True, True, True)
     w_calc.graph_generation_from_tile_node(tiles)
     vec = w_calc.pgrank_calculation()
     dg = w_calc.dg
 
-    # 设置rnode的degree
-    print(dg.in_degree())
-    print(dg.out_degree())
 
     # 设置 rnode中quadratic的weight 和 degree
     for index, node in enumerate(dg.nodes()):
@@ -711,6 +708,7 @@ def tile_weight_calc(tiles: List[TileNode]):
         dg.nodes[node]["pr"] = vec[index]
         # print(dg.nodes[node]["pr"])
         # print(dg.nodes[node]["name"])
+        print(dg.nodes[node]["pg_weight"])
 
     # 为各个瓦片创建节点集合
     node_set = [set() for _ in range(len(tiles))]
