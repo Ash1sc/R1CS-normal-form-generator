@@ -74,12 +74,19 @@ class Weight_Calculator:
         for i in range(len(self.adj_matrix)):
             for j in range(len(self.adj_matrix[0])):
                 self.adj_matrix[i][j] = float(matrix[i][j])
-        # TODO: 调整matrix, 为linear发出的边建立不同的权重
+
+        # 调整matrix, 为linear发出的边建立不同的权重
         # adj_matrix[i][j] 表示 i 到 j 有变
         if self.weighted is True:
-            print("Set Weight")
+            for index, node in enumerate(self.dg.nodes()):
+                if self.dg.nodes[node]["name"].startswith("l"):
+                    for vec in self.adj_matrix:
+                        if vec[index] != 0:
+                            vec[index] = self.dg.nodes[node]["pg_weight"]
+            print(self.adj_matrix)
         # self.__solve_ranking_leaked()
         # self.__calc_out_degree_ratio()
+
 
     def __solve_ranking_leaked(self):
         """
@@ -189,19 +196,21 @@ class Weight_Calculator:
         s_l = [set() for _ in range(len(linear))]
 
         # 对于二次约束, 保留原本node
+        # quadratic的pg_weight=1
         for index, tile in enumerate(quadratic):
 
-            self.dg.add_node("q" + str(tile.id), name="q" + str(tile.id))
+            self.dg.add_node("q" + str(tile.id), name="q" + str(tile.id), pg_weight=1)
 
             for f in tile.tile_father:
-                self.dg.add_node("q" + str(f.id), name="q" + str(f.id))
+                self.dg.add_node("q" + str(f.id), name="q" + str(f.id),pg_weight=1)
                 self.dg.add_edge("q" + str(f.id), "q" + str(tile.id))
 
             s_q[index] = tile.create_node_set()
 
         # 对于线性约束,做一次抽象, 在dg中只保留一个大的node
+        # linear的pg_weight为系数归一化后的方差
         for index, tile in enumerate(linear):
-            self.dg.add_node("l" + str(index), name="l" + str(index))
+            self.dg.add_node("l" + str(index), name="l" + str(index), pg_weight = tile.get_pg_weight())
             s_l[index] = tile.create_node_set()
 
         # for s in s_l:
