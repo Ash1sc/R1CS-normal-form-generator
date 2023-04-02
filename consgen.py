@@ -7,12 +7,13 @@ from functools import total_ordering
 
 @total_ordering
 class Index_and_weight:
-    def __init__(self, index=0, weight=0):
+    def __init__(self, index=0, weight=0, usage=0):
         self.index: float = index
         self.weight: float = weight
+        self.usage = usage
 
     def __gt__(self, other):
-        return self.weight > other.weight
+        return self.usage > other.usage or (self.usage == other.usage and self.weight > other.weight)
 
     def __eq__(self, other):
         return self.weight == other.weight
@@ -126,7 +127,9 @@ class Consgen:
 
         #  quadratic constraint中使用的最大的index
         self.__max_q_index = -1
-        self.__max_q_cons_id = -1
+
+        # quadratic constraint的数量
+        self.__q_cons_num = -1
         self.cons_num = 0
 
         # node id 到 矩阵中的列数
@@ -137,19 +140,29 @@ class Consgen:
 
         self.tw_list.sort(reverse=True)
 
-    def __quick_sort(self, iw: List[Index_and_weight], i, j):
+    def __constraint_length(self):
+        if self.cons_num == 0:
+            return 0
+        else:
+            return len(self.cons_list[0].a)
+
+    def __quick_sort(self, cons_index, iw: List[Index_and_weight], i, j):
         if i >= j:
             return list
-        pivot = Index_and_weight(iw[i].index, iw[i].weight)
+        pivot = Index_and_weight(iw[i].index, iw[i].weight, iw[i].usage)
 
         low = i
         high = j
         while i < j:
-            while i < j and iw[j].weight >= pivot.weight:
+            while i < j and \
+                    (iw[j] > pivot or self.cons_list[cons_index].a[iw[j].index] > self.cons_list[cons_index].a[
+                        pivot.index]):
                 j -= 1
             iw[i] = iw[j]
             self.__set_row(i, j)
-            while i < j and iw[i].weight <= pivot.weight:
+            while i < j and \
+                    (iw[j] < pivot or self.cons_list[cons_index].a[iw[j].index] < self.cons_list[cons_index].a[
+                        pivot.index]):
                 i += 1
             iw[j] = iw[i]
             self.__set_row(j, i)
@@ -310,7 +323,7 @@ class Consgen:
             # quadratic 一定是1,1,1的field
             if tile.is_quadratic():
 
-                self.__max_q_cons_id += 1
+                self.__q_cons_num += 1
 
                 child_id = tile.id
                 lf_id = tile.tile_father[0].id
@@ -401,13 +414,32 @@ class Consgen:
         iw_list: List[Index_and_weight] = []
         for cur_index in range(start_index, end_index + 1):
             weight = 0
-            for cons_index in range(self.__max_q_cons_id + 1, self.cons_num):
+            usage = 0
+            for cons_index in range(self.__q_cons_num + 1, self.cons_num):
                 weight = weight + (self.cons_list[cons_index].a[cur_index] + self.cons_list[cons_index].b[cur_index] +
                                    self.cons_list[cons_index].c[cur_index]) * self.tw_list[cons_index].weight
+                if self.cons_list[cons_index].a[cur_index] != 0:
+                    usage += 1
+                if self.cons_list[cons_index].b[cur_index] != 0:
+                    usage += 1
+                if self.cons_list[cons_index].c[cur_index] != 0:
+                    usage += 1
 
-            iw_list.append(Index_and_weight(cur_index, weight))
+            iw_list.append(Index_and_weight(cur_index, weight, usage))
+        # 对每一个linear constraint中的新增节点进行单独的排序
+        i = self.__max_q_index + 1
+        j = i
+        for cur_index in range(self.__q_cons_num, self.cons_num):
 
-        self.__quick_sort(iw_list, 0, len(iw_list) - 1)
+            if i >= self.__constraint_length():
+                break
+
+            while j < self.__constraint_length() and self.cons_list[cur_index].a[j] != 0:
+                j = j + 1
+
+            self.__quick_sort(cur_index, iw_list, i, j - 1)
+
+            i = j
 
         # 调整quadratic constraint中的列数顺序
         start_index = 0

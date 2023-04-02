@@ -9,9 +9,10 @@ import matplotlib.pyplot as plt
 
 class Weight_Calculator:
 
-    def __init__(self, show_graph, show_info):
+    def __init__(self, show_graph, show_info, weighted):
         self.show_graph = show_graph
         self.show_info = show_info
+        self.weighted = weighted
 
         self.alpha = 0.85  # 跳转因子
 
@@ -67,9 +68,18 @@ class Weight_Calculator:
         # calc_out_degree_ratio(adj_matrix)
         # # print(adj_matrix)
 
-        self.adj_matrix = np.array(nx.adjacency_matrix(self.dg).todense())
-        self.__solve_ranking_leaked()
-        self.__calc_out_degree_ratio()
+        # int matrix to float matrix
+        matrix = np.array(nx.adjacency_matrix(self.dg).todense())
+        self.adj_matrix = [[float(0)] * len(matrix[0]) for _ in range(len(matrix))]
+        for i in range(len(self.adj_matrix)):
+            for j in range(len(self.adj_matrix[0])):
+                self.adj_matrix[i][j] = float(matrix[i][j])
+        # TODO: 调整matrix, 为linear发出的边建立不同的权重
+        # adj_matrix[i][j] 表示 i 到 j 有变
+        if self.weighted is True:
+            print("Set Weight")
+        # self.__solve_ranking_leaked()
+        # self.__calc_out_degree_ratio()
 
     def __solve_ranking_leaked(self):
         """
@@ -235,24 +245,21 @@ class Weight_Calculator:
                     # print("add edge from q%d to q%d" % (quadratic[q_index].id, quadratic[q_index_2].id))
                     self.dg.add_edge(u, "q" + str(quadratic[q_index_2].id))
 
-
         # 线性与线性之间的边:
         for l_index1, l_node1 in enumerate(s_l):
             for l_index2, l_node2 in enumerate(s_l):
 
-                if l_index1==l_index2:
+                if l_index1 == l_index2:
                     continue
 
-                flag=False
+                flag = False
                 for l_id1 in l_node1:
                     if l_id1 in l_node2:
-                        flag=True
+                        flag = True
                         break
 
                 if flag:
                     self.dg.add_edge("l" + str(l_index1), "l" + str(l_index2))
-
-
 
         self.__get_init_pr()
 
