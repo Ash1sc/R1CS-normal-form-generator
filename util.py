@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 
 from mynodes.tilenode import *
 
-TXT_PATH = "constraints/constraint2.txt"
+
+# TXT_PATH = "constraints/constraints.txt"
 
 
-def make_matrix():
-    f = open(TXT_PATH, "r")
+def make_matrix(path):
+    f = open(path, "r")
     lines = f.readlines()
 
     row = line = 0
@@ -18,7 +19,7 @@ def make_matrix():
         if l.startswith("B"):
             line = index - 1
 
-    matrices = [[[0] * row for _ in range(line)] for _ in range(3)]
+    matrices = [[[0.0] * row for _ in range(line)] for _ in range(3)]
 
     matrix_id = -1
     prev_line_index = 0
@@ -30,7 +31,7 @@ def make_matrix():
 
         fields = l.split(",")
         for j, num in enumerate(fields):
-            matrices[matrix_id][i - prev_line_index - 1][j] = int(num)
+            matrices[matrix_id][i - prev_line_index - 1][j] = float(num)
 
     # 确保每一条限制中c的field中一定有一个是1
     # 以每条限制中不为常数项的field中大于0的最小的数为基准放缩
@@ -63,4 +64,30 @@ def make_matrix():
     return matrices[0], matrices[1], matrices[2]
 
 
+def make_txt(a: np.ndarray, b: np.ndarray, c: np.ndarray, path: str):
+    f = open(path, 'a')
 
+    lines: List[str] = []
+
+    lines.append("A\n")
+    for i in range(a.shape[0]):
+        line = ""
+        for j in range(a.shape[1] - 1):
+            line = line + "{0},".format(a[i][j])
+        line = line + str(a[i][a.shape[1] - 1])+"\n"
+        lines.append(line)
+    lines.append("B\n")
+    for i in range(b.shape[0]):
+        line = ""
+        for j in range(b.shape[1] - 1):
+            line = line + "{0},".format(b[i][j])
+        line = line + str(b[i][b.shape[1] - 1])+"\n"
+        lines.append(line)
+    lines.append("C\n")
+    for i in range(c.shape[0]):
+        line = ""
+        for j in range(c.shape[1] - 1):
+            line = line + "{0},".format(c[i][j])
+        line = line + str(c[i][c.shape[1] - 1])+"\n"
+        lines.append(line)
+    f.writelines(lines)
