@@ -37,7 +37,7 @@ def all_test():
 
 
 def matrix_test():
-    a, b, c = util.make_matrix()
+    a, b, c = util.make_matrix("constraints/constraints.txt")
 
     print(a)
     print(b)
@@ -66,7 +66,7 @@ def rnode_creation_test():
 # field * var 改为 const node * var node
 # const node 每次均为新建,所以const node 不会同时存在前驱与后继节点
 def tree_creation_test():
-    a, b, c = util.make_matrix()
+    a, b, c = util.make_matrix("benchmark/line_exchange/line_exchange_0_2.txt")
 
     node_num = len(a[0]) - 1
     var_num = len(a[0])
