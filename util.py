@@ -65,11 +65,10 @@ def make_matrix(path):
 
 
 def make_txt(a: np.ndarray, b: np.ndarray, c: np.ndarray, path: str):
-    f = open(path, 'a')
+    f = open(path, 'w')
 
-    lines: List[str] = []
+    lines: List[str] = ["A\n"]
 
-    lines.append("A\n")
     for i in range(a.shape[0]):
         line = ""
         for j in range(a.shape[1] - 1):
