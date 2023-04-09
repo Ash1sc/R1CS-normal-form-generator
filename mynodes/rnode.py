@@ -1,0 +1,168 @@
+from enum import Enum
+
+
+class Op(Enum):
+    NULL = 0
+    ADD = 1
+    MUL = 2
+
+
+class RNode:
+
+    CONST_NAME = "~one"
+    node_list = []
+    current_id = 0
+
+    @classmethod
+    def new_node(cls, op=Op.NULL, name="_", con=0):
+        node = RNode(RNode.current_id, op, name, con)
+        RNode.node_list.append(node)
+        RNode.current_id += 1
+
+        return node
+
+    @classmethod
+    def new_const_node(cls, con=0):
+        node = RNode(RNode.current_id, Op.NULL, "~one", con)
+        RNode.node_list.append(node)
+        RNode.current_id += 1
+
+        return node
+
+    @classmethod
+    def clear(cls):
+        RNode.current_id = 0
+        RNode.node_list = []
+        print("Clear the node list")
+
+    def __init__(self, id, op=Op.NULL, name="_", con=0, child=[], father=[]):  # 初始化类的属性
+        self.id = id
+        self.op = op
+        self.const = con
+        self.name = name
+        self.child = []
+
+        # 在对linear约束进一步抽象后获得的有向图的性质,仅quodratic约束相关节点拥有
+        self.weight = 0
+        self.degree = 0
+
+        for c in child:
+            self.child.append(c)
+
+        self.father = []
+        for f in father:
+            self.father.append(f)
+
+    def __str__(self) -> str:
+        if self.name == RNode.CONST_NAME:
+            return "Node id: %d, name: %s, value: %.2f" % (self.id, self.name, self.const)
+        else:
+            return "Node id: %d, name: %s, op: %s" % (self.id, self.name, self.op.name)
+
+    def print(self):
+        print(self)
+
+        if len(self.father) > 0:
+            print("\tFather:")
+            for f in self.father:
+                print("\t\t%s" % (f,))
+        if len(self.child) > 0:
+            print("\tChild:")
+            for c in self.child:
+                print("\t\t%s" % (c,))
+
+    def add_child(self, c):
+        for node in self.child:
+            if c.id==node.id:
+                return False
+
+        self.child.append(c)
+        c.father.append(self)
+        return True
+
+    def add_father(self, f):
+        for node in self.father:
+            if f.id==node.id:
+                return False
+
+        self.father.append(f)
+        f.child.append(self)
+        return True
+
+    def remove_child(self, c):
+        for node in self.child:
+            if node.id == c.id:
+                self.child.remove(c)
+                c.father.remove(self)
+                return True
+        return False
+
+    def remove_father(self, f):
+        for node in self.father:
+            if node.id == f.id:
+                self.father.remove(f)
+                f.child.remove(self)
+                return True
+        return False
+
+    def have_mul(self, node):
+        """
+        判断与node是否已有乘号直接连接
+        :param node:
+        :return: 与node相连接的乘号node
+        """
+        for c in self.child:
+            if c.op == Op.MUL:
+                for f in c.father:
+                    if f.id == node.id:
+                        return c
+
+        return None
+
+    def have_add(self, node):
+        """
+        判断与node是否已有加号直接连接
+        :param node:
+        :return: 与node相连接的加号node
+        """
+        for c in self.child:
+            if c.op == Op.ADD:
+                for f in c.father:
+                    if f.id == node.id:
+                        return c
+
+        return None
+
+    def add(self, node):
+        """
+        与另一个node相加
+        :param node:
+        :return: 相加后中间变量的node
+        """
+        result = self.have_add(node)
+        if result is None:
+            result = RNode.new_node(Op.ADD)
+            self.child.append(result)
+            node.child.append(result)
+            result.father.append(self)
+            result.father.append(node)
+        return result
+
+    def mul(self, node):
+        """
+        与另一个node相乘
+        :param node:
+        :return: 相乘后中间变量的node
+        """
+        result = self.have_mul(node)
+        if result is None:
+            result = RNode.new_node(Op.MUL)
+            self.child.append(result)
+            node.child.append(result)
+            result.father.append(self)
+            result.father.append(node)
+
+        return result
+
+    def is_const(self):
+        return self.name==RNode.CONST_NAME
