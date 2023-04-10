@@ -19,7 +19,7 @@ def all_test():
     rnode_creation_test()
 
     print("\n\n---Tree creation test----\n\n")
-    tree_creation_test()
+    tree_creation_test("benchmark/linear_new_vals/linear_new_vals_1.txt")
 
     print("\n\n----Node weight test-----\n\n")
     node_weight_test()
@@ -35,6 +35,21 @@ def all_test():
 
     print("\n\n---------Test end--------\n\n")
 
+def generation(path):
+    print("\n\n---Tree creation test----\n\n")
+    tree_creation_test(path)
+
+    print("\n\n----Node weight test-----\n\n")
+    node_weight_test()
+
+    print("\n\n----Cover type-1 test----\n\n")
+    tiles = cover_algorithm_1_test()
+
+    print("\n\n----Tile weight test-----\n\n")
+    tile_weight = tile_weight_calc(tiles)
+
+    print("\n\n----Cons generation test-----\n\n")
+    constraint_generation(tiles, tile_weight)
 
 def matrix_test():
     a, b, c = util.make_matrix("constraints/constraints.txt")
@@ -65,8 +80,8 @@ def rnode_creation_test():
 
 # field * var 改为 const node * var node
 # const node 每次均为新建,所以const node 不会同时存在前驱与后继节点
-def tree_creation_test():
-    a, b, c = util.make_matrix("benchmark/linear_new_vals/linear_new_vals_1.txt")
+def tree_creation_test(path):
+    a, b, c = util.make_matrix(path)
 
     node_num = len(a[0]) - 1
     var_num = len(a[0])
