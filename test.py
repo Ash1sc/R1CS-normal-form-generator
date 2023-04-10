@@ -66,7 +66,7 @@ def rnode_creation_test():
 # field * var 改为 const node * var node
 # const node 每次均为新建,所以const node 不会同时存在前驱与后继节点
 def tree_creation_test():
-    a, b, c = util.make_matrix("benchmark/row_exchange/row_exchange_1_3.txt")
+    a, b, c = util.make_matrix("benchmark/linear_new_vals/linear_new_vals_1.txt")
 
     node_num = len(a[0]) - 1
     var_num = len(a[0])
@@ -239,14 +239,14 @@ def tree_creation_test():
                                                     "\t\tCASE2, choose an existing node as node_right, id: %d" % (
                                                         node_right.id,))
 
-                                    if node1 is None or (node1.is_const() and node1.const == 1):
+                                    if (node1 is None) or (node1.is_const() and node1.const == 1):
                                         if node2_flag:
                                             node2 = RNode.new_const_node(1)
                                         node3 = node2
                                         print(
                                             "\t\tCASE2, choose node2 as node3, node3 id: %d " % (
                                                 node3.id,))
-                                    elif node2 is None or (node2.is_const() and node2.const == 1):
+                                    elif (node2 is None) or (node2.is_const() and node2.const == 1):
                                         if node1_flag:
                                             node1 = RNode.new_const_node(1)
                                         node3 = node1
@@ -287,12 +287,16 @@ def tree_creation_test():
                                             print("\t\tCASE2, node_left is None, id: %d, node1 id: %d. node2 id: %d" % (
                                                 node_left.id, node1.id, node2.id))
                                     else:
-                                        if node1.is_const() and node1.const == 1:
+                                        if node1 is None or (node1.is_const() and node1.const == 1):
+                                            if node2_flag:
+                                                node2 = RNode.new_const_node(1)
                                             node_left = node_left.add(node2)
                                             print(
                                                 "\t\tCASE2, add node2 to node_left, node2 id: %d, node_left id: %d" % (
                                                     node2.id, node_left.id,))
-                                        elif node2.is_const() and node2.const == 1:
+                                        elif node2 is None or (node2.is_const() and node2.const == 1):
+                                            if node1_flag:
+                                                node1 = RNode.new_const_node(1)
                                             node_left = node_left.add(node1)
                                             print(
                                                 "\t\tCASE2, add node1 to node_left, node1 id: %d, node_left id: %d" % (
