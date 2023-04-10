@@ -19,7 +19,7 @@ def all_test():
     rnode_creation_test()
 
     print("\n\n---Tree creation test----\n\n")
-    tree_creation_test()
+    tree_creation_test("benchmark/linear_new_vals/linear_new_vals_1.txt")
 
     print("\n\n----Node weight test-----\n\n")
     node_weight_test()
@@ -35,6 +35,21 @@ def all_test():
 
     print("\n\n---------Test end--------\n\n")
 
+def generation(path):
+    print("\n\n---Tree creation test----\n\n")
+    tree_creation_test(path)
+
+    print("\n\n----Node weight test-----\n\n")
+    node_weight_test()
+
+    print("\n\n----Cover type-1 test----\n\n")
+    tiles = cover_algorithm_1_test()
+
+    print("\n\n----Tile weight test-----\n\n")
+    tile_weight = tile_weight_calc(tiles)
+
+    print("\n\n----Cons generation test-----\n\n")
+    constraint_generation(tiles, tile_weight)
 
 def matrix_test():
     a, b, c = util.make_matrix("constraints/constraints.txt")
@@ -65,8 +80,11 @@ def rnode_creation_test():
 
 # field * var 改为 const node * var node
 # const node 每次均为新建,所以const node 不会同时存在前驱与后继节点
-def tree_creation_test():
-    a, b, c = util.make_matrix("benchmark/row_exchange/row_exchange_1_3.txt")
+def tree_creation_test(path):
+    a, b, c = util.make_matrix(path)
+    print(a)
+    print(b)
+    print(c)
 
     node_num = len(a[0]) - 1
     var_num = len(a[0])
@@ -239,14 +257,14 @@ def tree_creation_test():
                                                     "\t\tCASE2, choose an existing node as node_right, id: %d" % (
                                                         node_right.id,))
 
-                                    if node1 is None or (node1.is_const() and node1.const == 1):
+                                    if (node1 is None) or (node1.is_const() and node1.const == 1):
                                         if node2_flag:
                                             node2 = RNode.new_const_node(1)
                                         node3 = node2
                                         print(
                                             "\t\tCASE2, choose node2 as node3, node3 id: %d " % (
                                                 node3.id,))
-                                    elif node2 is None or (node2.is_const() and node2.const == 1):
+                                    elif (node2 is None) or (node2.is_const() and node2.const == 1):
                                         if node1_flag:
                                             node1 = RNode.new_const_node(1)
                                         node3 = node1
@@ -287,12 +305,16 @@ def tree_creation_test():
                                             print("\t\tCASE2, node_left is None, id: %d, node1 id: %d. node2 id: %d" % (
                                                 node_left.id, node1.id, node2.id))
                                     else:
-                                        if node1.is_const() and node1.const == 1:
+                                        if node1 is None or (node1.is_const() and node1.const == 1):
+                                            if node2_flag:
+                                                node2 = RNode.new_const_node(1)
                                             node_left = node_left.add(node2)
                                             print(
                                                 "\t\tCASE2, add node2 to node_left, node2 id: %d, node_left id: %d" % (
                                                     node2.id, node_left.id,))
-                                        elif node2.is_const() and node2.const == 1:
+                                        elif node2 is None or (node2.is_const() and node2.const == 1):
+                                            if node1_flag:
+                                                node1 = RNode.new_const_node(1)
                                             node_left = node_left.add(node1)
                                             print(
                                                 "\t\tCASE2, add node1 to node_left, node1 id: %d, node_left id: %d" % (
@@ -520,12 +542,16 @@ def tree_creation_test():
                                             node_left.id, node1.id, node2.id))
 
                                 else:
-                                    if node1.is_const() and node1.const == 1:
+                                    if node1 is None or (node1.is_const() and node1.const == 1):
+                                        if node2_flag:
+                                            node2 = RNode.new_const_node(1)
                                         node_left = node_left.add(node2)
                                         print(
                                             "\t\tCASE4, add node2 to node_left, node2 id: %d, node_left id: %d" % (
                                                 node2.id, node_left.id,))
-                                    elif node2.is_const() and node2.const == 1:
+                                    elif node2 is None or (node2.is_const() and node2.const == 1):
+                                        if node1_flag:
+                                            node1 = RNode.new_const_node(1)
                                         node_left = node_left.add(node1)
                                         print(
                                             "\t\tCASE4, add node1 to node_left, node1 id: %d, node_left id: %d" % (

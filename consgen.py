@@ -63,9 +63,9 @@ class Tile_n_weight:
 
 class Constraint:
     def __init__(self, size: float = 1):
-        self.a = [0 for _ in range(size)]
-        self.b = [0 for _ in range(size)]
-        self.c = [0 for _ in range(size)]
+        self.a = [0.0 for _ in range(size)]
+        self.b = [0.0 for _ in range(size)]
+        self.c = [0.0 for _ in range(size)]
 
     def get_size(self):
         return len(self.a)
@@ -78,9 +78,9 @@ class Constraint:
             return True
         else:
             for i in range(new_size - self.get_size()):
-                self.a.append(0)
-                self.b.append(0)
-                self.c.append(0)
+                self.a.append(0.0)
+                self.b.append(0.0)
+                self.c.append(0.0)
 
     def set_constraint(self, a_dict: Dict[int, int], b_dict: Dict[int, int], c_dict: Dict[int, int]):
 
@@ -148,41 +148,50 @@ class Consgen:
 
     def __quick_sort(self, cons_index, iw: List[Index_and_weight], i, j):
         if i >= j:
-            return list
+            return
         pivot = Index_and_weight(iw[i].index, iw[i].weight, iw[i].usage)
+
+        # 存储最开始pivot的field的副本
+        pivot_field = self.cons_list[cons_index].a[iw[i].index]
+        field_list = []
+        for index in range(cons_index, self.cons_num):
+            field_list.append(self.cons_list[index].a[pivot.index])
 
         low = i
         high = j
         while i < j:
             while i < j and \
-                    (iw[j] > pivot or self.cons_list[cons_index].a[iw[j].index] > self.cons_list[cons_index].a[
-                        pivot.index]):
+                    (iw[j].weight > pivot.weight or (
+                            iw[j].weight == pivot.weight and self.cons_list[cons_index].a[iw[j].index] >=
+                            pivot_field)) or ():
                 j -= 1
-            iw[i] = iw[j]
+            iw[i].weight = iw[j].weight
             self.__set_row(i, j)
             while i < j and \
-                    (iw[j] < pivot or self.cons_list[cons_index].a[iw[j].index] < self.cons_list[cons_index].a[
-                        pivot.index]):
+                    (iw[i].weight < pivot.weight or (
+                            iw[i].weight == pivot.weight and self.cons_list[cons_index].a[iw[i].index] <=
+                            pivot_field)):
                 i += 1
-            iw[j] = iw[i]
+            iw[j].weight = iw[i].weight
             self.__set_row(j, i)
-        iw[j] = pivot
-        self.cons_list[j] = pivot
-        self.__quick_sort(iw, low, i - 1)
-        self.__quick_sort(iw, i + 1, high)
+        iw[j].weight = pivot.weight
+        for index in range(cons_index, self.cons_num):
+            self.cons_list[index].a[j] = field_list[index - cons_index]
+        self.__quick_sort(cons_index, iw, low, i - 1)
+        self.__quick_sort(cons_index, iw, i + 1, high)
 
     def __swap_row(self, i, j):
 
         index = self.dict[i]
         self.dict[i] = self.dict[j]
-        self.dict[j] = self.dict[i]
+        self.dict[j] = index
 
         for cons in self.cons_list:
             cons.swap_row(i, j)
 
     def __set_row(self, i, j):
 
-        self.dict[i] = self.dict[j]
+        # self.dict[i] = self.dict[j]
 
         for cons in self.cons_list:
             cons.set_row(i, j)
@@ -325,7 +334,7 @@ class Consgen:
             # quadratic 直接利用
             # quadratic 一定是1,1,1的field
             if tile.is_quadratic():
-
+                print(tile.is_quadratic())
                 self.__q_cons_num += 1
 
                 child_id = tile.id
@@ -375,9 +384,11 @@ class Consgen:
                 #           \ (*) - 5
                 #                 \ (*) - 3
                 #                       \ 4
+                print(tile.is_quadratic())
                 if tile.rnode.op == Op.MUL:
+                    print("mul")
                     field, val_id, res_id = self.__get_mul_linear_dict(tile)
-
+                    print("{} * node {} = node {}".format(field, val_id, res_id))
                     a_dict = dict()
                     b_dict = dict()
                     c_dict = dict()
@@ -385,13 +396,18 @@ class Consgen:
                     val_index = self.__get_index(val_id)
                     res_index = self.__get_index(res_id)
 
-                    a_dict[0] = field
-                    b_dict[val_index] = 1
-                    c_dict[res_index] = 1
+                    # a_dict[0] = field
+                    # b_dict[val_index] = 1
+                    # c_dict[res_index] = 1
+
+                    a_dict[val_index] = field
+                    a_dict[res_index] = 1
+                    b_dict[0] = 1
 
                     self.__add_constraint(a_dict, b_dict, c_dict)
 
                 else:
+                    print("add")
                     # node id 到 field 的dict
                     field_dict, const = self.__get_add_linear_field_dict(tile)
 
@@ -424,8 +440,9 @@ class Consgen:
             weight = 0
             usage = 0
             for cons_index in range(self.__q_cons_num + 1, self.cons_num):
-                weight = weight + np.abs((self.cons_list[cons_index].a[cur_index] + self.cons_list[cons_index].b[cur_index] +
-                                   self.cons_list[cons_index].c[cur_index]) * self.tw_list[cons_index].weight)
+                weight = weight + np.abs(
+                    (self.cons_list[cons_index].a[cur_index] + self.cons_list[cons_index].b[cur_index] +
+                     self.cons_list[cons_index].c[cur_index]) * self.tw_list[cons_index].weight)
                 # if self.cons_list[cons_index].a[cur_index] != 0:
                 #     usage += 1
                 # if self.cons_list[cons_index].b[cur_index] != 0:
@@ -447,7 +464,8 @@ class Consgen:
 
             # 减去自己的field *　weight
             for val_index in range(i, j):
-                iw_list[val_index].weight-=np.abs(self.cons_list[cons_index].a[val_index] * self.tw_list[cons_index].weight)
+                iw_list[val_index].weight -= np.abs(
+                    self.cons_list[cons_index].a[val_index] * self.tw_list[cons_index].weight)
             self.__quick_sort(cons_index, iw_list, i, j - 1)
 
             i = j

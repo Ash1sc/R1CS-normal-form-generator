@@ -2,7 +2,7 @@ import test
 
 
 def do_test():
-    test.all_test()
+    test.generation("benchmark/more_linear_new_vals/more_linear_new_vals_312.txt")
 
 
 def main():
