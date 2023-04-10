@@ -125,10 +125,10 @@ class Consgen:
         # 0预留给~one变量
         self.current_index = 1
 
-        #  quadratic constraint中使用的最大的index
+        # quadratic constraint中使用的变量在矩阵中的最大的index
         self.__max_q_index = -1
 
-        # quadratic constraint的数量
+        # quadratic constraint在矩阵中最大的index
         self.__q_cons_num = -1
         self.cons_num = 0
 
@@ -415,32 +415,40 @@ class Consgen:
 
         # 计算linear constraint中新增变量的weight = Σ(field * tile weight)
         iw_list: List[Index_and_weight] = []
+
+        # quadratic 顶点占位
+        for i in range(self.__max_q_index + 1):
+            iw_list.append(Index_and_weight())
+
         for cur_index in range(start_index, end_index + 1):
             weight = 0
             usage = 0
             for cons_index in range(self.__q_cons_num + 1, self.cons_num):
-                weight = weight + (self.cons_list[cons_index].a[cur_index] + self.cons_list[cons_index].b[cur_index] +
-                                   self.cons_list[cons_index].c[cur_index]) * self.tw_list[cons_index].weight
-                if self.cons_list[cons_index].a[cur_index] != 0:
-                    usage += 1
-                if self.cons_list[cons_index].b[cur_index] != 0:
-                    usage += 1
-                if self.cons_list[cons_index].c[cur_index] != 0:
-                    usage += 1
+                weight = weight + np.abs((self.cons_list[cons_index].a[cur_index] + self.cons_list[cons_index].b[cur_index] +
+                                   self.cons_list[cons_index].c[cur_index]) * self.tw_list[cons_index].weight)
+                # if self.cons_list[cons_index].a[cur_index] != 0:
+                #     usage += 1
+                # if self.cons_list[cons_index].b[cur_index] != 0:
+                #     usage += 1
+                # if self.cons_list[cons_index].c[cur_index] != 0:
+                #     usage += 1
 
             iw_list.append(Index_and_weight(cur_index, weight, usage))
         # 对每一个linear constraint中的新增节点进行单独的排序
         i = self.__max_q_index + 1
         j = i
-        for cur_index in range(self.__q_cons_num, self.cons_num):
+        for cons_index in range(self.__q_cons_num + 1, self.cons_num):
 
             if i >= self.__constraint_length():
                 break
 
-            while j < self.__constraint_length() and self.cons_list[cur_index].a[j] != 0:
+            while j < self.__constraint_length() and self.cons_list[cons_index].a[j] != 0:
                 j = j + 1
 
-            self.__quick_sort(cur_index, iw_list, i, j - 1)
+            # 减去自己的field *　weight
+            for val_index in range(i, j):
+                iw_list[val_index].weight-=np.abs(self.cons_list[cons_index].a[val_index] * self.tw_list[cons_index].weight)
+            self.__quick_sort(cons_index, iw_list, i, j - 1)
 
             i = j
 
