@@ -168,8 +168,9 @@ class Consgen:
             iw[i].weight = iw[j].weight
             self.__set_row(i, j)
             while i < j and \
-                    (iw[i].weight < pivot.weight or (iw[i].weight == pivot.weight and self.cons_list[cons_index].a[iw[i].index] <=
-                                       pivot_field)):
+                    (iw[i].weight < pivot.weight or (
+                            iw[i].weight == pivot.weight and self.cons_list[cons_index].a[iw[i].index] <=
+                            pivot_field)):
                 i += 1
             iw[j].weight = iw[i].weight
             self.__set_row(j, i)
@@ -333,7 +334,7 @@ class Consgen:
             # quadratic 直接利用
             # quadratic 一定是1,1,1的field
             if tile.is_quadratic():
-
+                print(tile.is_quadratic())
                 self.__q_cons_num += 1
 
                 child_id = tile.id
@@ -383,9 +384,11 @@ class Consgen:
                 #           \ (*) - 5
                 #                 \ (*) - 3
                 #                       \ 4
+                print(tile.is_quadratic())
                 if tile.rnode.op == Op.MUL:
+                    print("mul")
                     field, val_id, res_id = self.__get_mul_linear_dict(tile)
-
+                    print("{} * node {} = node {}".format(field, val_id, res_id))
                     a_dict = dict()
                     b_dict = dict()
                     c_dict = dict()
@@ -393,13 +396,18 @@ class Consgen:
                     val_index = self.__get_index(val_id)
                     res_index = self.__get_index(res_id)
 
-                    a_dict[0] = field
-                    b_dict[val_index] = 1
-                    c_dict[res_index] = 1
+                    # a_dict[0] = field
+                    # b_dict[val_index] = 1
+                    # c_dict[res_index] = 1
+
+                    a_dict[val_index] = field
+                    a_dict[res_index] = 1
+                    b_dict[0] = 1
 
                     self.__add_constraint(a_dict, b_dict, c_dict)
 
                 else:
+                    print("add")
                     # node id 到 field 的dict
                     field_dict, const = self.__get_add_linear_field_dict(tile)
 
