@@ -301,5 +301,7 @@ def draw(iter_list, pr_list):
     :param pr_list: 每一个向量的值
     :return:
     """
-    plt.plot(iter_list, pr_list)
+    plt.plot(iter_list, pr_list,label=["q3","q2","q0","l0"])
+    plt.legend(loc="upper right")
+    plt.xticks([1,2,3,4,5])
     plt.show()

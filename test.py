@@ -735,7 +735,7 @@ def tile_weight_calc(tiles: List[TileNode]):
     for index, node in enumerate(dg.nodes()):
         dg.nodes[node]["pr"] = vec[index]
         # print(dg.nodes[node]["pr"])
-        # print(dg.nodes[node]["name"])
+        print(dg.nodes[node]["name"])
         print(dg.nodes[node]["pg_weight"])
 
     # 为各个瓦片创建节点集合
