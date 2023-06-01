@@ -1,5 +1,6 @@
 import os
 import shutil
+
 from_path = "./benchmark"
 to_path = "./new_benchmark"
 
@@ -25,11 +26,10 @@ for f in files:
             txt1 = path + "/" + txts[i]
             txt2 = path + "/" + txts[j]
 
-            if not os.path.exists(to_path + "/" + f+ "/" + str(num)):
-                os.makedirs(to_path + "/" + f+ "/" + str(num))
+            if not os.path.exists(to_path + "/" + f + "/" + str(num)):
+                os.makedirs(to_path + "/" + f + "/" + str(num))
 
             # 复制文件
-            shutil.copy(txt1, to_path + "/" + f+ "/" + str(num) + "/"+ txts[i])
-            shutil.copy(txt2, to_path + "/" + f + "/" + str(num) + "/" + txts[j])
-            num+=1
-
+            shutil.copy(txt1, to_path + "/" + f + "/" + str(num) + "/" + str(1) + ".txt")
+            shutil.copy(txt2, to_path + "/" + f + "/" + str(num) + "/" + str(2) + ".txt")
+            num += 1
