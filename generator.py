@@ -2,7 +2,7 @@ import test
 
 
 def do_test():
-    test.generation("benchmark/more_linear_new_vals/more_linear_new_vals_312.txt")
+    test.generation("constraints/constraint1.txt")
 
 
 def main():
