@@ -2,7 +2,7 @@ import test
 
 
 def do_test():
-    test.generation("constraints/constraint1.txt")
+    test.generation("./constraints/constraint1.txt")
 
 
 def main():
